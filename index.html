@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة الطلبات - Firebase</title>
+    <title>نظام إدارة الطلبات </title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -70,8 +70,51 @@
         }
         .btn-login { background: #667eea; color: white; }
         .btn-signup { background: #28a745; color: white; }
+        .btn-google { background: #db4437; color: white; }
         .btn-logout { background: #dc3545; color: white; }
+        .btn-settings { background: #17a2b8; color: white; }
         .error-msg { color: #dc3545; font-size: 14px; margin: 10px 0; display: none; }
+        
+        /* نافذة الإعدادات */
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .settings-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+        }
+        .settings-card h3 { margin-bottom: 20px; color: #333; }
+        .settings-card input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+        }
+        .settings-card button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .close-settings {
+            background: #6c757d;
+            color: white;
+        }
         
         .main-content { display: none; }
         
@@ -111,6 +154,7 @@
         }
         .form-group { display: flex; flex-direction: column; }
         label { font-weight: bold; margin-bottom: 8px; color: #555; }
+        label.optional::after { content: " (اختياري)"; font-weight: normal; color: #999; font-size: 12px; }
         input, select, textarea {
             padding: 12px;
             border: 2px solid #e0e0e0;
@@ -168,7 +212,6 @@
         .price-negative { color: #dc3545; font-weight: bold; }
         
         .action-btn { padding: 5px 10px; margin: 0 3px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; }
-        .edit-btn { background: #ffc107; color: #333; }
         .delete-btn { background: #dc3545; color: white; }
         
         .search-box { margin-bottom: 20px; }
@@ -199,7 +242,6 @@
             flex-wrap: wrap;
         }
         .btn-secondary { background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; }
-        .btn-danger { background: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; }
         
         .alert {
             padding: 12px;
@@ -238,6 +280,21 @@
         
         <button class="btn-login" onclick="login()">📝 تسجيل الدخول</button>
         <button class="btn-signup" onclick="signup()">🆕 إنشاء حساب جديد</button>
+        <button class="btn-google" onclick="loginWithGoogle()">🌐 تسجيل دخول بـ Google</button>
+    </div>
+</div>
+
+<!-- نافذة الإعدادات -->
+<div id="settingsModal" class="settings-modal">
+    <div class="settings-card">
+        <h3>⚙️ إعدادات الحساب</h3>
+        <input type="email" id="newEmail" placeholder="البريد الإلكتروني الجديد">
+        <input type="password" id="newPassword" placeholder="كلمة المرور الجديدة">
+        <input type="password" id="confirmPassword" placeholder="تأكيد كلمة المرور">
+        <div id="settingsError" class="error-msg"></div>
+        <button onclick="changeEmail()" style="background:#667eea; color:white;">✉️ تغيير البريد الإلكتروني</button>
+        <button onclick="changePassword()" style="background:#28a745; color:white;">🔑 تغيير كلمة المرور</button>
+        <button class="close-settings" onclick="closeSettings()">إغلاق</button>
     </div>
 </div>
 
@@ -256,7 +313,10 @@
         <!-- معلومات المستخدم -->
         <div class="user-info">
             <div id="userInfoDisplay">✅ مرحباً بك</div>
-            <button class="btn-logout" onclick="logout()">🚪 تسجيل خروج</button>
+            <div>
+                <button class="btn-settings" onclick="openSettings()" style="padding:8px 16px; margin-left:10px;">⚙️ الإعدادات</button>
+                <button class="btn-logout" onclick="logout()" style="padding:8px 16px;">🚪 تسجيل خروج</button>
+            </div>
         </div>
 
         <!-- نموذج إضافة طلب -->
@@ -264,8 +324,8 @@
             <h3>➕ إضافة طلب جديد</h3>
             <div class="form-grid">
                 <div class="form-group">
-                    <label>اسم العميل *</label>
-                    <input type="text" id="customerName" placeholder="أدخل اسم العميل">
+                    <label class="optional">اسم العميل (اختياري)</label>
+                    <input type="text" id="customerName" placeholder="أدخل اسم العميل - اختياري">
                 </div>
                 <div class="form-group">
                     <label>اسم المنتج *</label>
@@ -348,20 +408,19 @@
                     <tr><th>#</th><th>العميل</th><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الحالة</th><th>التاريخ</th><th>ملاحظات</th><th>إجراءات</th></tr>
                 </thead>
                 <tbody id="ordersList">
-                    <tr><td colspan="9" style="text-align:center;">📭 جاري التحميل...</td></tr>
+                    <tr><td colspan="9" style="text-align:center;">📭 جاري التحميل......</td></tr>
                 </tbody>
             </table>
         </div>
 
         <div class="control-buttons">
             <button onclick="exportToCSV()" class="btn-secondary">📥 تصدير إلى Excel</button>
-            <button onclick="deleteAllOrders()" class="btn-danger">🗑️ حذف الكل</button>
         </div>
     </div>
 </div>
 
 <script>
-    // 🔥🔥🔥 Firebase Config - تم وضعه مباشرة 🔥🔥🔥
+    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyDDrg8IoQ47x6M29_h1yFdmT8y4Ks-dgsM",
         authDomain: "data-3be96.firebaseapp.com",
@@ -375,11 +434,11 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
+    const provider = new firebase.auth.GoogleAuthProvider();
 
     let currentUser = null;
     let unsubscribeOrders = null;
     let currentFilter = 'all';
-    let editingId = null;
     let allOrders = [];
 
     // مراقبة حالة تسجيل الدخول
@@ -388,7 +447,7 @@
             currentUser = user;
             document.getElementById('loginOverlay').style.display = 'none';
             document.getElementById('mainContent').style.display = 'block';
-            document.getElementById('userInfoDisplay').innerHTML = `✅ مرحباً ${user.email}`;
+            document.getElementById('userInfoDisplay').innerHTML = `✅ مرحباً ${user.email} ${user.displayName ? '(' + user.displayName + ')' : ''}`;
             loadOrdersRealtime();
         } else {
             currentUser = null;
@@ -401,7 +460,7 @@
         }
     });
 
-    // تحميل الطلبات في الوقت الفعلي
+    // تحميل الطلبات
     function loadOrdersRealtime() {
         if (unsubscribeOrders) unsubscribeOrders();
         
@@ -417,7 +476,6 @@
                 filterAndRender(orders);
             }, (error) => {
                 console.error("خطأ:", error);
-                showAlert('خطأ في تحميل البيانات: ' + error.message, 'error');
             });
     }
 
@@ -462,11 +520,12 @@
             }
             
             const priceClass = (order.totalPrice < 0) ? 'price-negative' : '';
+            const customerName = order.customerName || '—';
             
             return `
                 <tr>
                     <td>${order.id?.slice(0,6) || '-'}</td>
-                    <td>${escapeHtml(order.customerName || '')}</td>
+                    <td>${escapeHtml(customerName)}</td>
                     <td>${escapeHtml(order.productName || '')}</td>
                     <td>${order.quantity || 0}</td>
                     <td class="${priceClass}">${order.totalPrice || 0} $</td>
@@ -520,8 +579,13 @@
         const status = document.getElementById('status').value;
         const notes = document.getElementById('notes').value.trim();
         
-        if (!customerName || !productName || !quantity || isNaN(totalPrice)) {
-            showAlert('الرجاء ملء جميع الحقول', 'error');
+        if (!productName) {
+            showAlert('الرجاء إدخال اسم المنتج', 'error');
+            return;
+        }
+        
+        if (isNaN(totalPrice)) {
+            showAlert('الرجاء إدخال سعر صحيح', 'error');
             return;
         }
         
@@ -532,10 +596,10 @@
         
         try {
             await db.collection('orders').add({
-                customerName, productName, quantity, totalPrice, status, notes,
+                customerName: customerName || null,
+                productName, quantity, totalPrice, status, notes,
                 date: firebase.firestore.FieldValue.serverTimestamp(),
-                createdBy: currentUser.email,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                createdBy: currentUser.email
             });
             
             document.getElementById('customerName').value = '';
@@ -563,25 +627,6 @@
         try {
             await db.collection('orders').doc(orderId).delete();
             showAlert('✅ تم حذف الطلب', 'success');
-        } catch (error) {
-            showAlert('❌ خطأ: ' + error.message, 'error');
-        }
-    }
-
-    async function deleteAllOrders() {
-        if (!confirm('⚠️ تحذير: هذا سيحذف جميع الطلبات نهائياً! هل أنت متأكد؟')) return;
-        
-        try {
-            const snapshot = await db.collection('orders').get();
-            if (snapshot.empty) {
-                showAlert('لا توجد طلبات للحذف', 'error');
-                return;
-            }
-            
-            const batch = db.batch();
-            snapshot.forEach(doc => batch.delete(doc.ref));
-            await batch.commit();
-            showAlert('✅ تم حذف جميع الطلبات', 'success');
         } catch (error) {
             showAlert('❌ خطأ: ' + error.message, 'error');
         }
@@ -635,8 +680,86 @@
         }
     }
 
+    async function loginWithGoogle() {
+        try {
+            await auth.signInWithPopup(provider);
+        } catch (error) {
+            document.getElementById('loginError').textContent = '❌ ' + error.message;
+            document.getElementById('loginError').style.display = 'block';
+        }
+    }
+
     async function logout() {
         await auth.signOut();
+    }
+
+    function openSettings() {
+        document.getElementById('settingsModal').style.display = 'flex';
+        document.getElementById('settingsError').style.display = 'none';
+        document.getElementById('newEmail').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+    }
+
+    function closeSettings() {
+        document.getElementById('settingsModal').style.display = 'none';
+    }
+
+    async function changeEmail() {
+        const newEmail = document.getElementById('newEmail').value;
+        const errorDiv = document.getElementById('settingsError');
+        
+        if (!newEmail) {
+            errorDiv.textContent = '⚠️ الرجاء إدخال البريد الإلكتروني الجديد';
+            errorDiv.style.display = 'block';
+            return;
+        }
+        
+        errorDiv.style.display = 'none';
+        
+        try {
+            await currentUser.updateEmail(newEmail);
+            showAlert('✅ تم تغيير البريد الإلكتروني بنجاح', 'success');
+            closeSettings();
+        } catch (error) {
+            errorDiv.textContent = '❌ ' + error.message;
+            errorDiv.style.display = 'block';
+        }
+    }
+
+    async function changePassword() {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const errorDiv = document.getElementById('settingsError');
+        
+        if (!newPassword) {
+            errorDiv.textContent = '⚠️ الرجاء إدخال كلمة المرور الجديدة';
+            errorDiv.style.display = 'block';
+            return;
+        }
+        
+        if (newPassword.length < 6) {
+            errorDiv.textContent = '⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+            errorDiv.style.display = 'block';
+            return;
+        }
+        
+        if (newPassword !== confirmPassword) {
+            errorDiv.textContent = '⚠️ كلمة المرور غير متطابقة';
+            errorDiv.style.display = 'block';
+            return;
+        }
+        
+        errorDiv.style.display = 'none';
+        
+        try {
+            await currentUser.updatePassword(newPassword);
+            showAlert('✅ تم تغيير كلمة المرور بنجاح', 'success');
+            closeSettings();
+        } catch (error) {
+            errorDiv.textContent = '❌ ' + error.message;
+            errorDiv.style.display = 'block';
+        }
     }
 
     function setFilter(filter, btn) {
@@ -659,7 +782,7 @@
         const headers = ['ID', 'العميل', 'المنتج', 'الكمية', 'السعر', 'الحالة', 'التاريخ', 'الملاحظات'];
         const rows = allOrders.map(order => [
             order.id,
-            order.customerName,
+            order.customerName || '',
             order.productName,
             order.quantity,
             order.totalPrice,
