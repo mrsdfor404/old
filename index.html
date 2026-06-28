@@ -1,826 +1,259 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة الطلبات </title>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <title>دليل اللياقة الذكية: خطة الـ 30 يوماً</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #16a085;
+            --secondary-color: #2c3e50;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+        }
         body {
-            font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            padding: 0;
+            margin: 0;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
-        .dashboard {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        h1 { color: #333; margin-bottom: 10px; font-size: 28px; }
-        .subtitle { color: #666; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0; }
-        
-        /* شاشة تسجيل الدخول */
-        .login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .hero-image {
             width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            z-index: 1000;
+            height: 400px;
+            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1200&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
             display: flex;
             justify-content: center;
             align-items: center;
+            color: white;
+            text-align: center;
+            flex-direction: column;
         }
-        .login-card {
-            background: white;
+        .hero-image h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+        }
+        .hero-image p {
+            font-size: 1.2rem;
+            margin-top: 10px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+        }
+        .container {
+            max-width: 850px;
+            margin: -50px auto 50px auto;
+            background: #fff;
             padding: 40px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
         }
-        .login-card h2 { margin-bottom: 20px; color: #333; }
-        .login-card input {
+        h2 {
+            color: var(--secondary-color);
+            border-right: 5px solid var(--primary-color);
+            padding-right: 15px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: var(--primary-color);
+            margin-top: 25px;
+        }
+        .section-image {
             width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-        }
-        .login-card button {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-login { background: #667eea; color: white; }
-        .btn-signup { background: #28a745; color: white; }
-        .btn-google { background: #db4437; color: white; }
-        .btn-logout { background: #dc3545; color: white; }
-        .btn-settings { background: #17a2b8; color: white; }
-        .error-msg { color: #dc3545; font-size: 14px; margin: 10px 0; display: none; }
-        
-        /* نافذة الإعدادات */
-        .settings-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-        .settings-card {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 450px;
-            text-align: center;
-        }
-        .settings-card h3 { margin-bottom: 20px; color: #333; }
-        .settings-card input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-        }
-        .settings-card button {
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
+            max-height: 350px;
+            object-fit: cover;
             border-radius: 8px;
-            cursor: pointer;
+            margin: 20px 0;
         }
-        .close-settings {
-            background: #6c757d;
-            color: white;
-        }
-        
-        .main-content { display: none; }
-        
-        .user-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #f8f9fa;
-            padding: 15px 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .warning-banner {
-            background: #fff3cd;
-            border-right: 4px solid #ffc107;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            color: #856404;
-            font-size: 14px;
-        }
-        
-        .form-section {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-        }
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .form-group { display: flex; flex-direction: column; }
-        label { font-weight: bold; margin-bottom: 8px; color: #555; }
-        label.optional::after { content: " (اختياري)"; font-weight: normal; color: #999; font-size: 12px; }
-        input, select, textarea {
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 14px;
-            font-family: inherit;
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-        }
-        .stat-card.warning {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-        .stat-number { font-size: 32px; font-weight: bold; }
-        .stat-note { font-size: 11px; margin-top: 8px; opacity: 0.8; }
-        
         table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
+            margin: 25px 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 14px;
+            text-align: center;
         }
         th {
-            background: #667eea;
+            background-color: var(--primary-color);
             color: white;
-            padding: 12px;
-            text-align: center;
         }
-        td { padding: 10px; text-align: center; border-bottom: 1px solid #f0f0f0; }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
         }
-        .status-new { background: #ffc107; color: #333; }
-        .status-progress { background: #17a2b8; color: white; }
-        .status-delivered { background: #28a745; color: white; }
-        .status-cancelled { background: #dc3545; color: white; }
-        
-        .price-negative { color: #dc3545; font-weight: bold; }
-        
-        .action-btn { padding: 5px 10px; margin: 0 3px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; }
-        .delete-btn { background: #dc3545; color: white; }
-        
-        .search-box { margin-bottom: 20px; }
-        .search-box input { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; }
-        
-        .filter-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
+        .tip-box {
+            background-color: #e8f8f5;
+            border-right: 4px solid var(--primary-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
         }
-        .filter-btn {
-            padding: 8px 16px;
-            background: #e9ecef;
-            color: #495057;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
+        ul, ol {
+            padding-right: 25px;
         }
-        .filter-btn.active { background: #667eea; color: white; }
-        
-        .control-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
+        li {
+            margin-bottom: 12px;
+        }
+        .exercise-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
             margin-top: 20px;
-            flex-wrap: wrap;
         }
-        .btn-secondary { background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; }
-        
-        .alert {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: none;
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1001;
-            min-width: 300px;
-            text-align: center;
-        }
-        .alert-success { background: #d4edda; color: #155724; }
-        .alert-error { background: #f8d7da; color: #721c24; }
-        
-        @media (max-width: 768px) {
-            .dashboard { padding: 15px; }
-            th, td { font-size: 12px; padding: 6px; }
+        @media (max-width: 600px) {
+            .exercise-list {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 20px;
+                margin: -20px 10px 20px 10px;
+            }
+            .hero-image h1 {
+                font-size: 1.8rem;
+            }
         }
     </style>
 </head>
 <body>
 
-<!-- شاشة تسجيل الدخول -->
-<div id="loginOverlay" class="login-overlay">
-    <div class="login-card">
-        <h2>🔐 نظام إدارة الطلبات</h2>
-        <p style="color:#666; margin-bottom:20px;">سجل دخولك للوصول إلى نظام الطلبات</p>
-        
-        <input type="email" id="loginEmail" placeholder="البريد الإلكتروني">
-        <input type="password" id="loginPassword" placeholder="كلمة المرور">
-        
-        <div id="loginError" class="error-msg"></div>
-        
-        <button class="btn-login" onclick="login()">📝 تسجيل الدخول</button>
-        <button class="btn-signup" onclick="signup()">🆕 إنشاء حساب جديد</button>
-        <button class="btn-google" onclick="loginWithGoogle()">🌐 تسجيل دخول بـ Google</button>
-    </div>
+<div class="hero-image">
+    <h1>📘 دليل اللياقة الذكية</h1>
+    <p>خطة الـ 30 يوماً المتكاملة للجسم المثالي من المنزل</p>
 </div>
 
-<!-- نافذة الإعدادات -->
-<div id="settingsModal" class="settings-modal">
-    <div class="settings-card">
-        <h3>⚙️ إعدادات الحساب</h3>
-        <input type="email" id="newEmail" placeholder="البريد الإلكتروني الجديد">
-        <input type="password" id="newPassword" placeholder="كلمة المرور الجديدة">
-        <input type="password" id="confirmPassword" placeholder="تأكيد كلمة المرور">
-        <div id="settingsError" class="error-msg"></div>
-        <button onclick="changeEmail()" style="background:#667eea; color:white;">✉️ تغيير البريد الإلكتروني</button>
-        <button onclick="changePassword()" style="background:#28a745; color:white;">🔑 تغيير كلمة المرور</button>
-        <button class="close-settings" onclick="closeSettings()">إغلاق</button>
+<div class="container">
+    
+    <h2>📄 المقدمة: لماذا هذا الدليل هو بوابتك للتغيير؟</h2>
+    <p>مرحباً بك في رحلة التغيير الحقيقي. العائق الأكبر الذي يمنع معظم الناس من تحسين لياقتهم وصحتهم ليس الكسل، بل هو **الوقت والتعقيد**. اشتراكات الجيم المكلفة، تضييع الساعات في المواصلات، والأنظمة الغذائية الصارمة والمملة تجعل الاستمرار أمراً شبه مستحيل في ظل ضغوطات الحياة والعمل اليومية.</p>
+    <p>هذا الدليل صُمم ليتغلب على كل هذه العوائق. لقد وضعنا هنا **خلاصة علم الرياضة والتغذية** في خطة عملية مدتها 30 يوماً فقط. لن تحتاج إلى أوزان، ولا إلى مساحات واسعة، بل فقط إلى 20-30 دقيقة يومياً وعزيمتك. السر لا يكمن في إرهاق جسدك لساعات، بل في التمرين بذكاء وبشكل متواصل. لنبدأ معاً!</p>
+
+    <img class="section-image" src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=800&auto=format&fit=crop" alt="تمرين منزلي">
+
+    <h2>1️⃣ الركائز الأساسية لنجاح الخطة</h2>
+    <p>قبل الدخول في جدول التمارين، هناك ثلاث قواعد أساسية إذا قمت بتطبيقها، ستضمن مضاعفة نتائجك خلال الـ 30 يوماً القادمة:</p>
+    
+    <h3>1. جودة الحركة قبل التكرار</h3>
+    <p>أن تقوم بعمل 10 تكرارات لتمرين الضغط بشكل صحيح وبطيء، أفضل بمراحل من عمل 30 تكراراً بشكل سريع وخاطئ قد يعرضك للإصابة. ركز دائماً على عصر العضلة المستهدفة والتحكم في النزول والصعود.</p>
+
+    <h3>2. قاعدة الاستشفاء العضلي</h3>
+    <p>العضلات لا تنمو وتتحسن أثناء التمرين، بل تنمو أثناء الراحة والنوم. احرص على النوم لمدة لا تقل عن 7 إلى 8 ساعات ليلاً، لأن هرمون النمو يفرز في أعلى مستوياته خلال النوم العميق.</p>
+
+    <h3>3. شرب الماء بذكاء</h3>
+    <p>الجفاف يقلل من كفاءة عضلاتك بنسبة تصل إلى 20%. اجعل هدفك شرب 3 لترات من الماء يومياً. وزعها ككوب ماء كل ساعة لتضمن بقاء معدل حرق الدهون في أعلى مستوياته.</p>
+
+    <div class="tip-box">
+        <strong>💡 معلومة تهمك:</strong> نقص الماء في الجسم يترجمه الدماغ أحياناً على أنه شعور بالجوع، لذلك قبل أن تفتح الثلاجة وتبحث عن سناك، اشرب كوباً كبيراً من الماء وانتظر 10 دقائق!
     </div>
-</div>
 
-<!-- المحتوى الرئيسي -->
-<div class="container main-content" id="mainContent">
-    <div class="dashboard">
-        <h1>📋 نظام إدارة الطلبات المتقدم</h1>
-        <div class="subtitle">حساب الإيرادات الذكي - يستبعد المبالغ السالبة والطلبات الملغية</div>
+    <img class="section-image" src="https://images.unsplash.com/photo-1518481612222-68bbe828ecd1?q=80&w=800&auto=format&fit=crop" alt="تغذية صحية">
 
-        <div class="warning-banner">
-            ⚠️ <strong>تنبيه مالي:</strong> المبالغ السالبة والطلبات الملغية لا تدخل في حساب إجمالي الإيرادات
+    <h2>2️⃣ جدول التمارين الأسبوعي (خطة الـ 30 يوماً)</h2>
+    <p>هذا الجدول مصمم ليعمل على حرق الدهون وبناء العضلات بالتوازي (Body Recomposition). كرر هذا الجدول أسبوعياً لمدة 4 أسابيع، وحاول زيادة عدد التكرارات أو تقليل وقت الراحة في كل أسبوع جديد لتحدي عضلاتك.</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>اليوم</th>
+                <th>نوع التمرين المستهدف</th>
+                <th>أهم التمارين المطلوبة</th>
+                <th>المدة الزمنية</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>السبت</strong></td>
+                <td>الجزء العلوي (صدر، أكتاف، ترايسبس)</td>
+                <td>Push-ups / Chair Dips</td>
+                <td>20-25 دقيقة</td>
+            </tr>
+            <tr>
+                <td><strong>الأحد</strong></td>
+                <td>الجزء السفلي (الأرجل والظهر السفلي)</td>
+                <td>Bodyweight Squats / Lunges</td>
+                <td>20-25 دقيقة</td>
+            </tr>
+            <tr>
+                <td><strong>الإثنين</strong></td>
+                <td>راحة إيجابية ونشاط خفيف</td>
+                <td>مشي في الهواء الطلق أو إطالات مرونة</td>
+                <td>30 دقيقة مشي</td>
+            </tr>
+            <tr>
+                <td><strong>الثلاثاء</strong></td>
+                <td>كارديو عالي الشدة وحرق دهون (HIIT)</td>
+                <td>Jumping Jacks / Mountain Climbers</td>
+                <td>15 دقيقة فقط</td>
+            </tr>
+            <tr>
+                <td><strong>الأربعاء</strong></td>
+                <td>عضلات البطن والجذع (Core)</td>
+                <td>Plank / Bicycle Crunches</td>
+                <td>15-20 دقيقة</td>
+            </tr>
+            <tr>
+                <td><strong>الخميس</strong></td>
+                <td>تمرين شامل لكامل الجسم (تحفيز عام)</td>
+                <td>دمج شامل بين تمارين الضغط والسكوات والبلانك</td>
+                <td>25 دقيقة</td>
+            </tr>
+            <tr>
+                <td><strong>الجمعة</strong></td>
+                <td>راحة تامة واستشفاء</td>
+                <td>إراحة الجسم بالكامل لتجديد الطاقة</td>
+                <td>-</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>💡 شرح مبسط لكيفية أداء التمارين الرئيسية:</h3>
+    <div class="exercise-list">
+        <div>
+            <strong>1. تمرين الضغط (Push-ups):</strong>
+            <p>يستهدف الصدر والأكتاف والذراعين. حافظ على استقامة ظهرك ورقبتك أثناء النزول والصعود. (إذا كان صعباً، يمكنك أداؤه والركبتين على الأرض).</p>
         </div>
-
-        <div id="alert" class="alert"></div>
-
-        <!-- معلومات المستخدم -->
-        <div class="user-info">
-            <div id="userInfoDisplay">✅ مرحباً بك</div>
-            <div>
-                <button class="btn-settings" onclick="openSettings()" style="padding:8px 16px; margin-left:10px;">⚙️ الإعدادات</button>
-                <button class="btn-logout" onclick="logout()" style="padding:8px 16px;">🚪 تسجيل خروج</button>
-            </div>
+        <div>
+            <strong>2. تمرين القرفصاء (Squats):</strong>
+            <p>التمرين الأقوى للأرجل. انزل لأسفل كأنك تجلس على كرسي خفي، واحرص ألا تتخطى ركبتاك أصابع قدميك.</p>
         </div>
-
-        <!-- نموذج إضافة طلب -->
-        <div class="form-section">
-            <h3>➕ إضافة طلب جديد</h3>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label class="optional">اسم العميل (اختياري)</label>
-                    <input type="text" id="customerName" placeholder="أدخل اسم العميل - اختياري">
-                </div>
-                <div class="form-group">
-                    <label>اسم المنتج *</label>
-                    <input type="text" id="productName" placeholder="أدخل اسم المنتج">
-                </div>
-                <div class="form-group">
-                    <label>الكمية *</label>
-                    <input type="number" id="quantity" min="1" value="1">
-                </div>
-                <div class="form-group">
-                    <label>السعر الإجمالي *</label>
-                    <input type="number" id="totalPrice" step="0.01" placeholder="0.00">
-                    <small style="color: #666;">⚠️ المبالغ السالبة لن تحتسب في الإيرادات</small>
-                </div>
-                <div class="form-group">
-                    <label>الحالة</label>
-                    <select id="status">
-                        <option value="جديد">🟡 جديد</option>
-                        <option value="قيد التنفيذ">🔵 قيد التنفيذ</option>
-                        <option value="تم التسليم">🟢 تم التسليم</option>
-                        <option value="ملغي">🔴 ملغي</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>ملاحظات</label>
-                    <textarea id="notes" rows="1" placeholder="ملاحظات إضافية"></textarea>
-                </div>
-            </div>
-            <button onclick="addOrder()" style="background:#667eea; color:white; padding:12px 30px; border:none; border-radius:10px; cursor:pointer;">💾 حفظ الطلب</button>
+        <div>
+            <strong>3. تمرين الغطس على الكرسي (Chair Dips):</strong>
+            <p>باستخدام أي كرسي ثابت في المنزل، ضع يديك على الحافة وانزل بجسمك لتشغيل عضلة الترايسبس (خلفية الذراع).</p>
         </div>
-
-        <!-- الإحصائيات -->
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number" id="totalOrders">0</div>
-                <div class="stat-label">إجمالي الطلبات</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="newOrders">0</div>
-                <div class="stat-label">طلبات جديدة</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="deliveredOrders">0</div>
-                <div class="stat-label">تم التسليم</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="cancelledOrders">0</div>
-                <div class="stat-label">ملغية</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="totalRevenue">0</div>
-                <div class="stat-label">💰 إجمالي الإيرادات</div>
-                <div class="stat-note">(لا تشمل السالب والملغي)</div>
-            </div>
-            <div class="stat-card warning">
-                <div class="stat-number" id="excludedAmount">0</div>
-                <div class="stat-label">🚫 المبالغ المستبعدة</div>
-                <div class="stat-note">(سالبة + ملغية)</div>
-            </div>
-        </div>
-
-        <!-- بحث -->
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="🔍 بحث عن طلب" onkeyup="filterOrders()">
-        </div>
-        
-        <div class="filter-buttons">
-            <button class="filter-btn active" onclick="setFilter('all', this)">الكل</button>
-            <button class="filter-btn" onclick="setFilter('جديد', this)">جديد</button>
-            <button class="filter-btn" onclick="setFilter('قيد التنفيذ', this)">قيد التنفيذ</button>
-            <button class="filter-btn" onclick="setFilter('تم التسليم', this)">تم التسليم</button>
-            <button class="filter-btn" onclick="setFilter('ملغي', this)">ملغي</button>
-            <button class="filter-btn" onclick="setFilter('negative', this)">⚠️ مبالغ سالبة</button>
-        </div>
-
-        <!-- جدول الطلبات -->
-        <div class="orders-table-wrapper">
-            <table>
-                <thead>
-                    <tr><th>#</th><th>العميل</th><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الحالة</th><th>التاريخ</th><th>ملاحظات</th><th>إجراءات</th></tr>
-                </thead>
-                <tbody id="ordersList">
-                    <tr><td colspan="9" style="text-align:center;">📭 جاري التحميل......</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="control-buttons">
-            <button onclick="exportToCSV()" class="btn-secondary">📥 تصدير إلى Excel</button>
+        <div>
+            <strong>4. تمرين البلانك (Plank):</strong>
+            <p>تمرين الثبات الأقوى لشد البطن والظهر. اثبت على ساعديك وأطراف قدميك واجعل جسمك مستقيماً كالمسطرة.</p>
         </div>
     </div>
+
+    <img class="section-image" src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop" alt="طبق صحي متوازن">
+
+    <h2>3️⃣ هندسة التغذية الذكية بدون حرمان</h2>
+    <p>الرياضة هي المحرك، لكن التغذية هي الوقود. بدون تنظيم طعامك، ستكون كمن يضغط على دواسة البنزين والسيارة في وضع الوقوف التام. لا نعطيك هنا رجيماً قاسياً يجعلك تكره حياتك، بل طريقة ذكية ومستدامة.</p>
+    
+    <h3>قاعدة الطبق الذكي المقسم:</h3>
+    <ul>
+        <li><strong>نصف الطبق (ألياف وفيتامينات):</strong> املأه بالخضار الطازجة، السلطة، أو الخضار المطبوخة سوتيه. سيعطيك شعوراً هائلاً بالشبع بأقل سعرات ممكنة.</li>
+        <li><strong>ربع الطبق (بناء العضلات):</strong> بروتين صافي مثل: صدور الدجاج، اللحم المفروم قليل الدهن، البيض المسلوق، السمك، أو التونة بالماء.</li>
+        <li><strong>ربع الطبق (الطاقة المستدامة):</strong> كربوهيدرات معقدة لا ترفع سكر الدم بسرعة، مثل: الأرز المسلوق، الشوفان، البطاطا الحلوة، أو خبز القمح الكامل.</li>
+    </ul>
+
+    <h3>🚫 الممنوعات الثلاثة لنتائج سريعة:</h3>
+    <ol>
+        <li><strong>السكر الأبيض والمشروبات الغازية:</strong> تحتوي على سعرات حرارية فارغة تسبب تخزين الدهون في منطقة البطن (الكرش) فوراً.</li>
+        <li><strong>الأطعمة المقلية بالزيوت المهدرجة:</strong> استبدلها بالشواء أو استخدام القلاية الهوائية (Air Fryer).</li>
+        <li><strong>الصلصات الجاهزة:</strong> مثل المايونيز والكاتشب التجاري، لأنها مليئة بالسكريات والزيوت المخفية.</li>
+    </ol>
+
+    <h2>📄 الخاتمة: رحلتك بدأت الآن</h2>
+    <p>تذكر دائماً أن التغيير لا يحدث بين عشية وضحاها. الـ 30 يوماً القادمة ليست مجرد فترة مؤقتة وتنتهي، بل هي حجر الأساس لبناء نمط حياة صحي وقوي يدوم معك طوال العمر. التزم بجدولك، وتناول طعامك بذكاء، وثق تماماً أن النتائج ستتحدث عن نفسها قريباً جداً.</p>
+    <p style="text-align: center; font-weight: bold; color: var(--primary-color); font-size: 1.2rem;">نراكم في القمة دائماً!</p>
+
 </div>
 
-<script>
-    // Firebase Config
-    const firebaseConfig = {
-        apiKey: "AIzaSyDDrg8IoQ47x6M29_h1yFdmT8y4Ks-dgsM",
-        authDomain: "data-3be96.firebaseapp.com",
-        projectId: "data-3be96",
-        storageBucket: "data-3be96.firebasestorage.app",
-        messagingSenderId: "788223478248",
-        appId: "1:788223478248:web:cf9281af0dfe29644bfc5d"
-    };
-
-    // تهيئة Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-    const provider = new firebase.auth.GoogleAuthProvider();
-
-    let currentUser = null;
-    let unsubscribeOrders = null;
-    let currentFilter = 'all';
-    let allOrders = [];
-
-    // مراقبة حالة تسجيل الدخول
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            currentUser = user;
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'block';
-            document.getElementById('userInfoDisplay').innerHTML = `✅ مرحباً ${user.email} ${user.displayName ? '(' + user.displayName + ')' : ''}`;
-            loadOrdersRealtime();
-        } else {
-            currentUser = null;
-            document.getElementById('loginOverlay').style.display = 'flex';
-            document.getElementById('mainContent').style.display = 'none';
-            if (unsubscribeOrders) {
-                unsubscribeOrders();
-                unsubscribeOrders = null;
-            }
-        }
-    });
-
-    // تحميل الطلبات
-    function loadOrdersRealtime() {
-        if (unsubscribeOrders) unsubscribeOrders();
-        
-        unsubscribeOrders = db.collection('orders')
-            .orderBy('date', 'desc')
-            .onSnapshot((snapshot) => {
-                const orders = [];
-                snapshot.forEach(doc => {
-                    orders.push({ id: doc.id, ...doc.data() });
-                });
-                allOrders = orders;
-                updateStats(orders);
-                filterAndRender(orders);
-            }, (error) => {
-                console.error("خطأ:", error);
-            });
-    }
-
-    function filterAndRender(orders) {
-        let filtered = [...orders];
-        
-        if (currentFilter !== 'all') {
-            if (currentFilter === 'negative') {
-                filtered = orders.filter(o => o.totalPrice < 0);
-            } else {
-                filtered = orders.filter(o => o.status === currentFilter);
-            }
-        }
-        
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        if (searchTerm) {
-            filtered = filtered.filter(o => 
-                (o.customerName && o.customerName.toLowerCase().includes(searchTerm)) ||
-                (o.productName && o.productName.toLowerCase().includes(searchTerm))
-            );
-        }
-        
-        renderOrders(filtered);
-    }
-
-    function renderOrders(ordersList) {
-        const tbody = document.getElementById('ordersList');
-        
-        if (ordersList.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">📭 لا توجد طلبات</td></tr>';
-            return;
-        }
-        
-        tbody.innerHTML = ordersList.map(order => {
-            const statusClass = order.status === 'جديد' ? 'status-new' :
-                               order.status === 'قيد التنفيذ' ? 'status-progress' :
-                               order.status === 'تم التسليم' ? 'status-delivered' : 'status-cancelled';
-            
-            let dateStr = '-';
-            if (order.date && order.date.toDate) {
-                dateStr = order.date.toDate().toLocaleDateString('ar-EG');
-            }
-            
-            const priceClass = (order.totalPrice < 0) ? 'price-negative' : '';
-            const customerName = order.customerName || '—';
-            
-            return `
-                <tr>
-                    <td>${order.id?.slice(0,6) || '-'}</td>
-                    <td>${escapeHtml(customerName)}</td>
-                    <td>${escapeHtml(order.productName || '')}</td>
-                    <td>${order.quantity || 0}</td>
-                    <td class="${priceClass}">${order.totalPrice || 0} $</td>
-                    <td>
-                        <span class="status-badge ${statusClass}">${order.status || 'جديد'}</span>
-                        <br>
-                        <select onchange="updateStatus('${order.id}', this.value)" style="margin-top:5px;font-size:11px;padding:3px;">
-                            <option ${order.status === 'جديد' ? 'selected' : ''}>جديد</option>
-                            <option ${order.status === 'قيد التنفيذ' ? 'selected' : ''}>قيد التنفيذ</option>
-                            <option ${order.status === 'تم التسليم' ? 'selected' : ''}>تم التسليم</option>
-                            <option ${order.status === 'ملغي' ? 'selected' : ''}>ملغي</option>
-                        </select>
-                    </td>
-                    <td>${dateStr}</td>
-                    <td><small>${escapeHtml(order.notes || '-')}</small></td>
-                    <td>
-                        <button class="action-btn delete-btn" onclick="deleteOrder('${order.id}')">🗑️ حذف</button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    }
-
-    function updateStats(orders) {
-        const total = orders.length;
-        const newOrders = orders.filter(o => o.status === 'جديد').length;
-        const deliveredOrders = orders.filter(o => o.status === 'تم التسليم').length;
-        const cancelledOrders = orders.filter(o => o.status === 'ملغي').length;
-        const actualRevenue = orders
-            .filter(o => o.status !== 'ملغي' && (o.totalPrice || 0) > 0)
-            .reduce((sum, o) => sum + (o.totalPrice || 0), 0);
-        const excludedAmount = orders
-            .filter(o => o.status === 'ملغي' || (o.totalPrice || 0) < 0)
-            .reduce((sum, o) => sum + Math.abs(o.totalPrice || 0), 0);
-
-        document.getElementById('totalOrders').textContent = total;
-        document.getElementById('newOrders').textContent = newOrders;
-        document.getElementById('deliveredOrders').textContent = deliveredOrders;
-        document.getElementById('cancelledOrders').textContent = cancelledOrders;
-        document.getElementById('totalRevenue').textContent = actualRevenue.toFixed(2);
-        document.getElementById('excludedAmount').textContent = excludedAmount.toFixed(2);
-    }
-
-    async function addOrder() {
-        if (!currentUser) { showAlert('الرجاء تسجيل الدخول', 'error'); return; }
-        
-        const customerName = document.getElementById('customerName').value.trim();
-        const productName = document.getElementById('productName').value.trim();
-        const quantity = parseInt(document.getElementById('quantity').value);
-        const totalPrice = parseFloat(document.getElementById('totalPrice').value);
-        const status = document.getElementById('status').value;
-        const notes = document.getElementById('notes').value.trim();
-        
-        if (!productName) {
-            showAlert('الرجاء إدخال اسم المنتج', 'error');
-            return;
-        }
-        
-        if (isNaN(totalPrice)) {
-            showAlert('الرجاء إدخال سعر صحيح', 'error');
-            return;
-        }
-        
-        if (quantity <= 0) {
-            showAlert('⚠️ الكمية يجب أن تكون أكبر من صفر', 'error');
-            return;
-        }
-        
-        try {
-            await db.collection('orders').add({
-                customerName: customerName || null,
-                productName, quantity, totalPrice, status, notes,
-                date: firebase.firestore.FieldValue.serverTimestamp(),
-                createdBy: currentUser.email
-            });
-            
-            document.getElementById('customerName').value = '';
-            document.getElementById('productName').value = '';
-            document.getElementById('quantity').value = '1';
-            document.getElementById('totalPrice').value = '';
-            document.getElementById('notes').value = '';
-            showAlert('✅ تم إضافة الطلب بنجاح', 'success');
-        } catch (error) {
-            showAlert('❌ خطأ: ' + error.message, 'error');
-        }
-    }
-
-    async function updateStatus(orderId, newStatus) {
-        try {
-            await db.collection('orders').doc(orderId).update({ status: newStatus });
-            showAlert('✅ تم تحديث الحالة', 'success');
-        } catch (error) {
-            showAlert('❌ خطأ: ' + error.message, 'error');
-        }
-    }
-
-    async function deleteOrder(orderId) {
-        if (!confirm('⚠️ هل أنت متأكد من حذف هذا الطلب؟')) return;
-        try {
-            await db.collection('orders').doc(orderId).delete();
-            showAlert('✅ تم حذف الطلب', 'success');
-        } catch (error) {
-            showAlert('❌ خطأ: ' + error.message, 'error');
-        }
-    }
-
-    async function login() {
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        const errorDiv = document.getElementById('loginError');
-        
-        if (!email || !password) {
-            errorDiv.textContent = '⚠️ الرجاء إدخال البريد وكلمة المرور';
-            errorDiv.style.display = 'block';
-            return;
-        }
-        
-        errorDiv.style.display = 'none';
-        try {
-            await auth.signInWithEmailAndPassword(email, password);
-            document.getElementById('loginEmail').value = '';
-            document.getElementById('loginPassword').value = '';
-        } catch (error) {
-            errorDiv.textContent = '❌ ' + error.message;
-            errorDiv.style.display = 'block';
-        }
-    }
-
-    async function signup() {
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        const errorDiv = document.getElementById('loginError');
-        
-        if (!email || !password) {
-            errorDiv.textContent = '⚠️ الرجاء إدخال البريد وكلمة المرور';
-            errorDiv.style.display = 'block';
-            return;
-        }
-        
-        if (password.length < 6) {
-            errorDiv.textContent = '⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل';
-            errorDiv.style.display = 'block';
-            return;
-        }
-        
-        errorDiv.style.display = 'none';
-        try {
-            await auth.createUserWithEmailAndPassword(email, password);
-        } catch (error) {
-            errorDiv.textContent = '❌ ' + error.message;
-            errorDiv.style.display = 'block';
-        }
-    }
-
-    async function loginWithGoogle() {
-        try {
-            await auth.signInWithPopup(provider);
-        } catch (error) {
-            document.getElementById('loginError').textContent = '❌ ' + error.message;
-            document.getElementById('loginError').style.display = 'block';
-        }
-    }
-
-    async function logout() {
-        await auth.signOut();
-    }
-
-    function openSettings() {
-        document.getElementById('settingsModal').style.display = 'flex';
-        document.getElementById('settingsError').style.display = 'none';
-        document.getElementById('newEmail').value = '';
-        document.getElementById('newPassword').value = '';
-        document.getElementById('confirmPassword').value = '';
-    }
-
-    function closeSettings() {
-        document.getElementById('settingsModal').style.display = 'none';
-    }
-
-    async function changeEmail() {
-        const newEmail = document.getElementById('newEmail').value;
-        const errorDiv = document.getElementById('settingsError');
-        
-        if (!newEmail) {
-            errorDiv.textContent = '⚠️ الرجاء إدخال البريد الإلكتروني الجديد';
-            errorDiv.style.display = 'block';
-            return;
-        }
-        
-        errorDiv.style.display = 'none';
-        
-        try {
-            await currentUser.updateEmail(newEmail);
-            showAlert('✅ تم تغيير البريد الإلكتروني بنجاح', 'success');
-            closeSettings();
-        } catch (error) {
-            errorDiv.textContent = '❌ ' + error.message;
-            errorDiv.style.display = 'block';
-        }
-    }
-
-    async function changePassword() {
-        const newPassword = document.getElementById('newPassword').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
-        const errorDiv = document.getElementById('settingsError');
-        
-        if (!newPassword) {
-            errorDiv.textContent = '⚠️ الرجاء إدخال كلمة المرور الجديدة';
-            errorDiv.style.display = 'block';
-            return;
-        }
-        
-        if (newPassword.length < 6) {
-            errorDiv.textContent = '⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل';
-            errorDiv.style.display = 'block';
-            return;
-        }
-        
-        if (newPassword !== confirmPassword) {
-            errorDiv.textContent = '⚠️ كلمة المرور غير متطابقة';
-            errorDiv.style.display = 'block';
-            return;
-        }
-        
-        errorDiv.style.display = 'none';
-        
-        try {
-            await currentUser.updatePassword(newPassword);
-            showAlert('✅ تم تغيير كلمة المرور بنجاح', 'success');
-            closeSettings();
-        } catch (error) {
-            errorDiv.textContent = '❌ ' + error.message;
-            errorDiv.style.display = 'block';
-        }
-    }
-
-    function setFilter(filter, btn) {
-        currentFilter = filter;
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        if (btn) btn.classList.add('active');
-        filterAndRender(allOrders);
-    }
-
-    function filterOrders() {
-        filterAndRender(allOrders);
-    }
-
-    function exportToCSV() {
-        if (allOrders.length === 0) {
-            showAlert('لا توجد بيانات للتصدير', 'error');
-            return;
-        }
-        
-        const headers = ['ID', 'العميل', 'المنتج', 'الكمية', 'السعر', 'الحالة', 'التاريخ', 'الملاحظات'];
-        const rows = allOrders.map(order => [
-            order.id,
-            order.customerName || '',
-            order.productName,
-            order.quantity,
-            order.totalPrice,
-            order.status,
-            order.date?.toDate?.().toLocaleString('ar-EG') || '',
-            order.notes
-        ]);
-        
-        const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
-        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.href = url;
-        link.setAttribute('download', `الطلبات_${new Date().toLocaleDateString()}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        
-        showAlert('✅ تم تصدير البيانات بنجاح', 'success');
-    }
-
-    function showAlert(message, type) {
-        const alertDiv = document.getElementById('alert');
-        alertDiv.textContent = message;
-        alertDiv.className = `alert alert-${type}`;
-        alertDiv.style.display = 'block';
-        setTimeout(() => {
-            alertDiv.style.display = 'none';
-        }, 3000);
-    }
-
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-</script>
 </body>
 </html>
