@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>For My Princess 🌸</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <style>
+        .touch-none { touch-action: none; }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-pink-200 via-rose-100 to-purple-200 flex flex-col items-center justify-center p-4 overflow-hidden select-none">
+
+    <!-- أزرار تغيير اللغات -->
+    <div id="lang-container" class="absolute top-4 right-4 flex gap-2 z-30">
+        <button onclick="setLanguage('ar')" id="btn-ar" class="px-3 py-1 rounded-full text-xs font-bold shadow transition-all bg-pink-600 text-white scale-105">AR</button>
+        <button onclick="setLanguage('en')" id="btn-en" class="px-3 py-1 rounded-full text-xs font-bold shadow transition-all bg-white/80 text-pink-700 hover:bg-white">EN</button>
+        <button onclick="setLanguage('fr')" id="btn-fr" class="px-3 py-1 rounded-full text-xs font-bold shadow transition-all bg-white/80 text-pink-700 hover:bg-white">FR</button>
+    </div>
+
+    <!-- المربع الأبيض الأساسي (الحاضنة لهروب زر لا) -->
+    <div id="card" class="relative w-full max-w-sm h-[480px] bg-white/80 backdrop-blur-xl rounded-3xl border border-white shadow-2xl p-6 flex flex-col items-center justify-between text-center overflow-hidden">
+        
+        <div id="question-screen" class="w-full h-full flex flex-col justify-between items-center">
+            <div class="mt-4">
+                <div class="text-5xl mb-2 animate-bounce">👸🏻✨</div>
+                <h1 id="main-title" class="text-xl font-extrabold text-pink-700 leading-snug">أميرتي.. هل تحبينني؟ 🌸✨</h1>
+                <p id="main-hint" class="text-xs text-pink-500 mt-2 font-medium px-2">زر (لا) مهارب للابد.. ما في مفر من الحب! 🥺💖</p>
+            </div>
+
+            <div id="buttons-area" class="w-full h-full relative my-2">
+                <!-- زر نعم (يكبر تدريجياً) -->
+                <button id="yes-btn" onclick="handleAccept()" class="absolute top-[45%] left-[28%] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform duration-200 active:scale-95 z-20">
+                    نعم أحبك! 💖
+                </button>
+
+                <!-- زر لا (يهرب للأبد داخل المربع فقط) -->
+                <button id="no-btn" onpointerdown="dodgeNo(event)" onmouseenter="dodgeNo(event)" ontouchstart="dodgeNo(event)" class="absolute top-[45%] left-[72%] -translate-x-1/2 -translate-y-1/2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-5 rounded-full shadow transition-all duration-150 ease-out z-10 touch-none">
+                    لا 💔
+                </button>
+            </div>
+        </div>
+
+        <div id="success-screen" class="hidden my-auto flex flex-col items-center">
+            <div class="text-6xl mb-4 animate-pulse">🎉👑💖</div>
+            <h2 id="win-title" class="text-3xl font-extrabold text-pink-600">كنت أعلم ذلك! 👑💖</h2>
+            <p id="win-desc" class="text-sm text-pink-400 mt-2">أنتِ أجمل هدية في حياتي! ✨</p>
+        </div>
+
+    </div>
+
+    <script>
+        const translations = {
+            ar: {
+                title: "أميرتي.. هل تحبينني؟ 🌸✨",
+                hint: "زر (لا) مهارب للابد.. ما في مفر من الحب! 🥺💖",
+                yes: "نعم أحبك! 💖",
+                no: "لا 💔",
+                winTitle: "كنت أعلم ذلك! 👑💖",
+                winDesc: "أنتِ أجمل هدية في حياتي! ✨",
+                dir: "rtl"
+            },
+            en: {
+                title: "My Princess.. Do you love me? 🌸✨",
+                hint: "The 'No' button runs forever.. No escape from love! 🥺💖",
+                yes: "Yes, I do! 💖",
+                no: "No 💔",
+                winTitle: "I knew it! 👑💖",
+                winDesc: "You are the best gift in my life! ✨",
+                dir: "ltr"
+            },
+            fr: {
+                title: "Ma Princesse.. M'aimes-tu? 🌸✨",
+                hint: "Le bouton 'Non' s'enfuit.. Pas d'échappatoire! 🥺💖",
+                yes: "Oui, je t'aime! 💖",
+                no: "Non 💔",
+                winTitle: "Je le savais! 👑💖",
+                winDesc: "Tu es le plus beau cadeau! ✨",
+                dir: "ltr"
+            }
+        };
+
+        let currentLang = 'ar';
+        let yesScale = 1;
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.setAttribute('dir', translations[lang].dir);
+            document.getElementById('main-title').innerText = translations[lang].title;
+            document.getElementById('main-hint').innerText = translations[lang].hint;
+            document.getElementById('yes-btn').innerText = translations[lang].yes;
+            document.getElementById('no-btn').innerText = translations[lang].no;
+            document.getElementById('win-title').innerText = translations[lang].winTitle;
+            document.getElementById('win-desc').innerText = translations[lang].winDesc;
+
+            ['ar', 'en', 'fr'].forEach(l => {
+                const btn = document.getElementById(`btn-${l}`);
+                if (l === lang) {
+                    btn.className = "px-3 py-1 rounded-full text-xs font-bold shadow transition-all bg-pink-600 text-white scale-105";
+                } else {
+                    btn.className = "px-3 py-1 rounded-full text-xs font-bold shadow transition-all bg-white/80 text-pink-700 hover:bg-white";
+                }
+            });
+        }
+
+        function dodgeNo(e) {
+            if (e) e.preventDefault();
+            const card = document.getElementById('card');
+            const noBtn = document.getElementById('no-btn');
+            const yesBtn = document.getElementById('yes-btn');
+
+            const rect = card.getBoundingClientRect();
+            const btnWidth = 90;
+            const btnHeight = 40;
+            const padding = 25;
+
+            const maxLeft = rect.width - btnWidth - padding;
+            const maxTop = rect.height - btnHeight - padding;
+
+            const randomLeft = Math.max(padding, Math.random() * maxLeft);
+            const randomTop = Math.max(padding + 80, Math.random() * maxTop);
+
+            noBtn.style.left = `${randomLeft}px`;
+            noBtn.style.top = `${randomTop}px`;
+
+            yesScale = Math.min(yesScale + 0.12, 2.2);
+            yesBtn.style.transform = `translate(-50%, -50%) scale(${yesScale})`;
+
+            if (navigator.vibrate) navigator.vibrate(40);
+        }
+
+        function handleAccept() {
+            document.getElementById('question-screen').classList.add('hidden');
+            document.getElementById('success-screen').classList.remove('hidden');
+            document.getElementById('lang-container').classList.add('hidden');
+
+            confetti({
+                particleCount: 120,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+    </script>
+</body>
+</html>
