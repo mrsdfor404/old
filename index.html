@@ -1,148 +1,699 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>For My Princess 🌸</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>هل تحبينني يا أميرتي؟ 👑💖</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Confetti Library -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Tajawal:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
     <style>
-        .touch-none { touch-action: none; }
+        * {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #fff0f6 0%, #fce7f3 35%, #f472b6 75%, #e879f9 100%);
+            overscroll-behavior: none;
+            min-height: 100vh;
+        }
+
+        /* Glassmorphism White Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 2px solid rgba(255, 240, 245, 0.9);
+            box-shadow: 0 25px 50px -12px rgba(236, 72, 153, 0.35), 0 0 30px rgba(244, 114, 182, 0.2);
+        }
+
+        /* Spring-like smooth Dodge physics for NO button */
+        #no-btn {
+            transition: transform 0.28s cubic-bezier(0.34, 1.75, 0.64, 1);
+            will-change: transform;
+            touch-action: none;
+        }
+
+        /* Ambient floating romantic background particles */
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; }
+            20% { opacity: 0.9; }
+            80% { opacity: 0.9; }
+            100% { transform: translateY(-105vh) rotate(360deg) scale(1.2); opacity: 0; }
+        }
+
+        .floating-particle {
+            position: fixed;
+            bottom: -50px;
+            pointer-events: none;
+            animation: floatUp linear infinite;
+            z-index: 1;
+            filter: drop-shadow(0 4px 6px rgba(244, 114, 182, 0.3));
+        }
+
+        /* Pulsing Glow Effect on YES Button */
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.6), 0 0 15px rgba(244, 114, 182, 0.4); }
+            50% { box-shadow: 0 15px 35px -5px rgba(236, 72, 153, 0.8), 0 0 25px rgba(244, 114, 182, 0.7); }
+        }
+
+        .pulse-glow {
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+
+        /* Floating Emote popups on dodge */
+        @keyframes popFade {
+            0% { opacity: 0; transform: translate(-50%, 0) scale(0.5) rotate(-10deg); }
+            50% { opacity: 1; transform: translate(-50%, -35px) scale(1.3) rotate(10deg); }
+            100% { opacity: 0; transform: translate(-50%, -60px) scale(1) rotate(0deg); }
+        }
+
+        .emote-popup {
+            position: absolute;
+            pointer-events: none;
+            animation: popFade 0.85s ease-out forwards;
+            font-size: 2rem;
+            z-index: 40;
+        }
+
+        /* Custom Scrollbar for Code Inspector Modal */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #1e1e2e;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #f472b6;
+            border-radius: 4px;
+        }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-pink-200 via-rose-100 to-purple-200 flex flex-col items-center justify-center p-4 overflow-hidden select-none">
 
-    <!-- أزرار تغيير اللغات -->
-    <div id="lang-container" class="absolute top-4 right-4 flex gap-2 z-30">
-        <button onclick="setLanguage('ar')" id="btn-ar" class="px-3 py-1 rounded-full text-xs font-bold shadow transition-all bg-pink-600 text-white scale-105">AR</button>
-        <button onclick="setLanguage('en')" id="btn-en" class="px-3 py-1 rounded-full text-xs font-bold shadow transition-all bg-white/80 text-pink-700 hover:bg-white">EN</button>
-        <button onclick="setLanguage('fr')" id="btn-fr" class="px-3 py-1 rounded-full text-xs font-bold shadow transition-all bg-white/80 text-pink-700 hover:bg-white">FR</button>
-    </div>
+<body class="h-full w-full flex flex-col justify-between items-center p-3 sm:p-4 overflow-hidden relative selection:bg-none">
 
-    <!-- المربع الأبيض الأساسي (الحاضنة لهروب زر لا) -->
-    <div id="card" class="relative w-full max-w-sm h-[480px] bg-white/80 backdrop-blur-xl rounded-3xl border border-white shadow-2xl p-6 flex flex-col items-center justify-between text-center overflow-hidden">
-        
-        <div id="question-screen" class="w-full h-full flex flex-col justify-between items-center">
-            <div class="mt-4">
-                <div class="text-5xl mb-2 animate-bounce">👸🏻✨</div>
-                <h1 id="main-title" class="text-xl font-extrabold text-pink-700 leading-snug">أميرتي.. هل تحبينني؟ 🌸✨</h1>
-                <p id="main-hint" class="text-xs text-pink-500 mt-2 font-medium px-2">زر (لا) مهارب للابد.. ما في مفر من الحب! 🥺💖</p>
-            </div>
+    <!-- Ambient Floating Particles (Hearts, Stars, Flowers) -->
+    <div id="particles-bg" class="absolute inset-0 overflow-hidden pointer-events-none z-0"></div>
 
-            <div id="buttons-area" class="w-full h-full relative my-2">
-                <!-- زر نعم (يكبر تدريجياً) -->
-                <button id="yes-btn" onclick="handleAccept()" class="absolute top-[45%] left-[28%] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform duration-200 active:scale-95 z-20">
-                    نعم أحبك! 💖
-                </button>
-
-                <!-- زر لا (يهرب للأبد داخل المربع فقط) -->
-                <button id="no-btn" onpointerdown="dodgeNo(event)" onmouseenter="dodgeNo(event)" ontouchstart="dodgeNo(event)" class="absolute top-[45%] left-[72%] -translate-x-1/2 -translate-y-1/2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-5 rounded-full shadow transition-all duration-150 ease-out z-10 touch-none">
-                    لا 💔
-                </button>
-            </div>
+    <!-- Header / Top Control Bar -->
+    <header class="w-full max-w-md flex justify-between items-center pt-2 pb-1 z-20">
+        <!-- Crown & Title Badge -->
+        <div class="flex items-center gap-2 bg-white/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-pink-200 shadow-sm">
+            <span class="text-xl animate-bounce">👑</span>
+            <span class="text-xs font-black text-pink-700 tracking-wide uppercase">For My Princess ✨</span>
         </div>
 
-        <div id="success-screen" class="hidden my-auto flex flex-col items-center">
-            <div class="text-6xl mb-4 animate-pulse">🎉👑💖</div>
-            <h2 id="win-title" class="text-3xl font-extrabold text-pink-600">كنت أعلم ذلك! 👑💖</h2>
-            <p id="win-desc" class="text-sm text-pink-400 mt-2">أنتِ أجمل هدية في حياتي! ✨</p>
-        </div>
+        <div class="flex items-center gap-2">
+            <!-- Multi-Language Selector -->
+            <select id="lang-select" onchange="changeLanguage(this.value)" class="bg-white/90 backdrop-blur-md text-pink-700 font-bold px-3 py-1.5 rounded-full text-xs sm:text-sm border border-pink-300 shadow-sm focus:outline-none cursor-pointer">
+                <option value="ar">🇸🇦 العربية</option>
+                <option value="en">🇬🇧 English</option>
+                <option value="fr">🇫🇷 Français</option>
+            </select>
 
+            <!-- Tech Stack / Code Inspector Button -->
+            <button onclick="toggleCodeModal(true)" class="bg-white/90 hover:bg-pink-50 text-pink-600 p-2 rounded-full border border-pink-300 shadow-sm transition-transform active:scale-95 text-xs font-bold flex items-center justify-center w-8 h-8" title="عرض لغات البرمجة المستعملة">
+                <i class="fa-solid fa-code"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container White Glass Card (STRICT BOUNDARY CONTAINER FOR "NO" BUTTON) -->
+    <main class="w-full max-w-md my-auto z-10 py-2">
+        <div id="card" class="glass-card rounded-3xl p-5 sm:p-6 text-center relative overflow-hidden transition-all duration-300 min-h-[490px] flex flex-col justify-between items-center">
+            
+            <!-- Dynamic Cute Mascot Display -->
+            <div class="w-full pt-1 relative">
+                <div id="mascot" class="text-7xl sm:text-8xl transition-all duration-300 transform inline-block filter drop-shadow-md hover:scale-110 cursor-pointer" onclick="playTeaseSound()">
+                    👑🥺
+                </div>
+            </div>
+
+            <!-- Romantic Question Title & Interactive Teasing Subtitle -->
+            <div class="w-full my-auto px-1 z-10">
+                <h1 id="main-title" class="text-2xl sm:text-3xl font-black text-gray-800 mb-2 leading-snug drop-shadow-sm">
+                    هل تحبينني يا أميرتي؟ 💖✨
+                </h1>
+                <p id="sub-title" class="text-pink-600 font-bold text-xs sm:text-sm min-h-[42px] flex items-center justify-center px-2 transition-all duration-300 bg-pink-50/80 rounded-2xl border border-pink-100/80 shadow-inner">
+                    فكري جيداً قبل الإجابة يا جميلتي! 🌸🎀
+                </p>
+            </div>
+
+            <!-- Interactive Buttons Play Area (Bounded Playground inside White Card) -->
+            <div id="interactive-area" class="w-full relative min-h-[180px] flex flex-col justify-end items-center gap-3.5 pb-2 overflow-hidden rounded-2xl border border-pink-100/50 bg-white/40 p-2">
+                
+                <!-- YES Button (Progressively grows and seduces tap) -->
+                <button id="yes-btn" onclick="celebrateLove()" class="w-full bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 text-white font-black py-3.5 px-6 rounded-2xl shadow-lg pulse-glow text-lg sm:text-xl flex items-center justify-center gap-2 active:scale-95 transition-all duration-300 cursor-pointer border-b-4 border-rose-700 z-10">
+                    <i class="fa-solid fa-heart animate-pulse"></i>
+                    <span id="yes-text">نعم، أحبك جداً! 💖</span>
+                </button>
+
+                <!-- NO Button (NEVER GETS CLICKED - STAYS FOREVER INSIDE THIS WHITE CARD BOUNDARY) -->
+                <button id="no-btn" class="w-full bg-pink-50/90 border-2 border-pink-200 text-pink-700 font-bold py-3 px-6 rounded-2xl shadow-sm text-base flex items-center justify-center gap-2 cursor-pointer z-20">
+                    <i class="fa-solid fa-heart-crack text-pink-400"></i>
+                    <span id="no-text">لا 💔</span>
+                </button>
+
+            </div>
+
+            <!-- Celebration View (Initially Hidden) -->
+            <div id="success-view" class="hidden flex-col items-center justify-center py-2 space-y-4 my-auto w-full z-20">
+                <div class="relative w-32 h-32 sm:w-36 sm:h-36 rounded-full border-4 border-pink-300 shadow-2xl bg-gradient-to-tr from-pink-200 to-rose-100 flex items-center justify-center text-6xl animate-bounce">
+                    👸💖✨
+                </div>
+                <h2 id="success-title" class="text-xl sm:text-2xl font-black text-pink-600 leading-snug px-2">
+                    أعرف أنك تحبينني! أنتِ أجمل هدية في حياتي ✨🥰
+                </h2>
+                <p id="success-desc" class="text-gray-600 text-xs sm:text-sm font-semibold px-4">
+                    شكراً لأنك أميرتي العظيمة ومصدر سعادتي كل يوم! 👑🌸
+                </p>
+                <div class="flex gap-2">
+                    <button onclick="playChimeSound()" class="bg-pink-500 text-white font-bold text-xs py-2.5 px-5 rounded-full shadow-md active:scale-95 transition-transform flex items-center gap-2">
+                        <i class="fa-solid fa-music"></i> نغمة الحب 🎵
+                    </button>
+                    <button onclick="resetApp()" class="bg-pink-100 text-pink-700 text-xs font-bold py-2.5 px-5 rounded-full border border-pink-300 active:scale-95 transition-transform">
+                        إعادة السؤال 🔄
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Code Inspector Drawer / Multi-Programming Modal -->
+    <div id="code-modal" class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 hidden flex-col justify-center items-center p-4 transition-opacity">
+        <div class="bg-gray-900 border border-pink-500/30 text-white rounded-3xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+            <!-- Modal Header -->
+            <div class="p-4 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-laptop-code text-pink-400 text-lg"></i>
+                    <div>
+                        <h3 class="text-sm font-bold text-pink-300">طريقة التطبيق بأكثر من لغة برمجة</h3>
+                        <p class="text-[10px] text-gray-400">Implementation in Multiple Languages</p>
+                    </div>
+                </div>
+                <button onclick="toggleCodeModal(false)" class="text-gray-400 hover:text-white text-xl p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Language Tabs -->
+            <div class="flex border-b border-gray-800 bg-gray-950 overflow-x-auto text-xs custom-scroll">
+                <button onclick="switchCodeTab('js')" id="tab-js" class="px-4 py-2.5 font-mono font-bold text-pink-400 border-b-2 border-pink-500 bg-gray-900/60 whitespace-nowrap">
+                    JavaScript (DOM)
+                </button>
+                <button onclick="switchCodeTab('python')" id="tab-python" class="px-4 py-2.5 font-mono text-gray-400 hover:text-gray-200 whitespace-nowrap">
+                    Python (Flask/PyScript)
+                </button>
+                <button onclick="switchCodeTab('react')" id="tab-react" class="px-4 py-2.5 font-mono text-gray-400 hover:text-gray-200 whitespace-nowrap">
+                    React + Tailwind
+                </button>
+                <button onclick="switchCodeTab('csharp')" id="tab-csharp" class="px-4 py-2.5 font-mono text-gray-400 hover:text-gray-200 whitespace-nowrap">
+                    C# (.NET Blazor)
+                </button>
+            </div>
+
+            <!-- Code Content Box -->
+            <div class="p-4 overflow-y-auto font-mono text-xs text-pink-100 bg-gray-950/90 custom-scroll flex-1">
+                <pre id="code-snippet-box" class="whitespace-pre-wrap leading-relaxed">
+// Select NO button and white card container
+const noBtn = document.getElementById('no-btn');
+const card = document.getElementById('card');
+
+// Bounded escape physics inside the card
+function dodgeInsideCard() {
+    const cardRect = card.getBoundingClientRect();
+    const padding = 20;
+    
+    const maxX = cardRect.width - noBtn.offsetWidth - padding;
+    const maxY = cardRect.height - noBtn.offsetHeight - padding;
+
+    const newX = Math.random() * (maxX - padding) + padding;
+    const newY = Math.random() * (maxY - padding) + padding;
+
+    noBtn.style.position = 'absolute';
+    noBtn.style.transform = `translate3d(${newX}px, ${newY}px, 0)`;
+}
+                </pre>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-3 bg-gray-900 border-t border-gray-800 text-center text-[11px] text-gray-400">
+                ✨ تم تصميم المنطق بشكل احترافي ليعمل بسلاسة 100% على مختلف البيئات وتقنيات البرمجة.
+            </div>
+        </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="text-white text-xs font-bold opacity-90 z-10 pb-1 text-center drop-shadow flex items-center gap-1.5">
+        <span>صُنع لأجمل أميرة</span> <i class="fa-solid fa-crown text-amber-300"></i>
+    </footer>
 
     <script>
+        // Dictionary for Multilingual Romantic Content Designed Specifically for a Girl
         const translations = {
             ar: {
-                title: "أميرتي.. هل تحبينني؟ 🌸✨",
-                hint: "زر (لا) مهارب للابد.. ما في مفر من الحب! 🥺💖",
-                yes: "نعم أحبك! 💖",
-                no: "لا 💔",
-                winTitle: "كنت أعلم ذلك! 👑💖",
-                winDesc: "أنتِ أجمل هدية في حياتي! ✨",
-                dir: "rtl"
+                title: "هل تحبينني يا أميرتي؟ 💖✨",
+                subtitle: "فكري جيداً قبل الإجابة يا جميلتي! 🌸🎀",
+                yesBtn: "نعم، أحبك جداً! 💖",
+                noBtn: "لا 💔",
+                successTitle: "أعرف أنك تحبينني! أنتِ أجمل هدية في حياتي ✨🥰",
+                successDesc: "شكراً لأنك أميرتي العظيمة ومصدر سعادتي كل يوم! 👑🌸",
+                mascots: ['👑🥺', '👸💖', '🎀✨', '🐰❤️', '😭💔', '🙈💘', '👑😍'],
+                subtitles: [
+                    "ما في خيار لا يا حلوتي! 🥺✨",
+                    "قلبك يحبني، لا تحاولي الهروب! 💖",
+                    "الزر يهرب منك لأن الحب مصيرنا! 💘",
+                    "حتى الزر معترض على كلمة لا! 🤭🌸",
+                    "انقري نعم يا جميلتي أسهلك! 😉👑",
+                    "مستحيل تمسكي الزر! 🚀🎀",
+                    "يا أميرتي اعترافي بحبك فوراً! 🥰🌹"
+                ],
+                noPhrases: ["لا 💔", "أكيد؟ 🥺", "حاولي مجدداً! 😜", "الزر يهرب! 🏃‍♀️", "لا خيار لـ لا! 😭", "لن تمسكيني! 🚀", "اكتبي نعم! 💖"]
             },
             en: {
-                title: "My Princess.. Do you love me? 🌸✨",
-                hint: "The 'No' button runs forever.. No escape from love! 🥺💖",
-                yes: "Yes, I do! 💖",
-                no: "No 💔",
-                winTitle: "I knew it! 👑💖",
-                winDesc: "You are the best gift in my life! ✨",
-                dir: "ltr"
+                title: "Do you love me, Princess? 👑💖",
+                subtitle: "Think carefully, my beautiful girl! 🌸🎀",
+                yesBtn: "Yes, I love you so much! 💖",
+                noBtn: "No 💔",
+                successTitle: "I knew it! You are the sweetest gift in my life ✨🥰",
+                successDesc: "Thank you for being my amazing princess and my daily joy! 👑🌸",
+                mascots: ['👑🥺', '👸💖', '🎀✨', '🐰❤️', '😭💔', '🙈💘', '👑😍'],
+                subtitles: [
+                    "There is no 'No' option for you, beautiful! 🥺✨",
+                    "Your heart loves me, don't try to run! 💖",
+                    "The button dodges because love is our destiny! 💘",
+                    "Even the NO button refuses your click! 🤭🌸",
+                    "Tapping YES is way easier, my Princess! 😉👑",
+                    "You will never catch the NO button! 🚀🎀",
+                    "Just admit your love already! 🥰🌹"
+                ],
+                noPhrases: ["No 💔", "Are you sure? 🥺", "Try again! 😜", "Can't catch me! 🏃‍♀️", "No choice! 😭", "Too slow! 🚀", "Click YES! 💖"]
             },
             fr: {
-                title: "Ma Princesse.. M'aimes-tu? 🌸✨",
-                hint: "Le bouton 'Non' s'enfuit.. Pas d'échappatoire! 🥺💖",
-                yes: "Oui, je t'aime! 💖",
-                no: "Non 💔",
-                winTitle: "Je le savais! 👑💖",
-                winDesc: "Tu es le plus beau cadeau! ✨",
-                dir: "ltr"
+                title: "M'aimes-tu, ma princesse ? 👑💖",
+                subtitle: "Réfléchis bien, ma belle ! 🌸🎀",
+                yesBtn: "Oui, je t'aime tellement ! 💖",
+                noBtn: "Non 💔",
+                successTitle: "Je le savais ! Tu es le plus beau cadeau de ma vie ✨🥰",
+                successDesc: "Merci d'être ma princesse merveilleuse et mon bonheur ! 👑🌸",
+                mascots: ['👑🥺', '👸💖', '🎀✨', '🐰❤️', '😭💔', '🙈💘', '👑😍'],
+                subtitles: [
+                    "Pas d'option 'Non' pour toi, ma belle ! 🥺✨",
+                    "Ton cœur m'aime, n'essaie pas de fuir ! 💖",
+                    "Le bouton s'enfuit car c'est le destin ! 💘",
+                    "Même le bouton refuse de dire non ! 🤭🌸",
+                    "Cliquer OUI est tellement plus simple ! 😉👑",
+                    "Tu ne m'attraperas jamais ! 🚀🎀",
+                    "Avoue ton amour enfin ! 🥰🌹"
+                ],
+                noPhrases: ["Non 💔", "Tu es sûre ? 🥺", "Ressaie ! 😜", "Trop rapide ! 🏃‍♀️", "Impossible ! 😭", "Trop lente ! 🚀", "Clique OUI ! 💖"]
             }
         };
 
+        // Multi-programming snippets for code inspector
+        const codeSnippets = {
+            js: `// JavaScript (Pure Vanilla DOM)
+const noBtn = document.getElementById('no-btn');
+const card = document.getElementById('card');
+
+function dodgeInsideCard() {
+    const cardRect = card.getBoundingClientRect();
+    const pad = 20; // safety border offset
+    
+    const maxX = cardRect.width - noBtn.offsetWidth - pad;
+    const maxY = cardRect.height - noBtn.offsetHeight - pad;
+
+    const newX = Math.floor(Math.random() * (maxX - pad)) + pad;
+    const newY = Math.floor(Math.random() * (maxY - pad)) + pad;
+
+    noBtn.style.position = 'absolute';
+    noBtn.style.transform = \`translate3d(\${newX}px, \${newY}px, 0)\`;
+}`,
+            python: `# Python (Flask / PyScript / WebAssembly)
+import random
+
+def calculate_bounded_dodge(card_w, card_h, btn_w, btn_h, pad=20):
+    max_x = card_w - btn_w - pad
+    max_y = card_h - btn_h - pad
+    
+    new_x = random.randint(pad, max(pad, int(max_x)))
+    new_y = random.randint(pad, max(pad, int(max_y)))
+    
+    return {"x": new_x, "y": new_y, "transform": f"translate3d({new_x}px, {new_y}px, 0)"}`,
+            react: `// React + Tailwind CSS Hook Component
+import { useState, useRef } from 'react';
+
+export default function LoveProposition() {
+  const [pos, setPos] = useState({ x: 0, y: 0, isAbs: false });
+  const cardRef = useRef(null);
+
+  const handleDodge = () => {
+    if (!cardRef.current) return;
+    const card = cardRef.current.getBoundingClientRect();
+    const pad = 20;
+    const newX = Math.random() * (card.width - 120 - pad) + pad;
+    const newY = Math.random() * (card.height - 50 - pad) + pad;
+    
+    setPos({ x: newX, y: newY, isAbs: true });
+  };
+
+  return (
+    <div ref={cardRef} className="relative glass-card">
+      <button 
+        style={{ transform: pos.isAbs ? \`translate3d(\${pos.x}px, \${pos.y}px, 0)\` : 'none', position: pos.isAbs ? 'absolute' : 'relative' }}
+        onPointerDown={handleDodge}
+      >
+        No 💔
+      </button>
+    </div>
+  );
+}`,
+            csharp: `// C# (.NET Blazor WebAssembly Component)
+@code {
+    private double newX = 0;
+    private double newY = 0;
+    private bool isAbsolute = false;
+
+    private void EvadeNoButton(double cardWidth, double cardHeight, double btnWidth, double btnHeight)
+    {
+        double pad = 20;
+        double maxX = cardWidth - btnWidth - pad;
+        double maxY = cardHeight - btnHeight - pad;
+
+        Random rnd = new Random();
+        newX = rnd.Next((int)pad, Math.Max((int)pad, (int)maxX));
+        newY = rnd.Next((int)pad, Math.Max((int)pad, (int)maxY));
+        isAbsolute = true;
+    }
+}`
+        };
+
         let currentLang = 'ar';
+        let dodgeCount = 0;
         let yesScale = 1;
 
-        function setLanguage(lang) {
-            currentLang = lang;
-            document.documentElement.setAttribute('dir', translations[lang].dir);
-            document.getElementById('main-title').innerText = translations[lang].title;
-            document.getElementById('main-hint').innerText = translations[lang].hint;
-            document.getElementById('yes-btn').innerText = translations[lang].yes;
-            document.getElementById('no-btn').innerText = translations[lang].no;
-            document.getElementById('win-title').innerText = translations[lang].winTitle;
-            document.getElementById('win-desc').innerText = translations[lang].winDesc;
+        const card = document.getElementById('card');
+        const noBtn = document.getElementById('no-btn');
+        const yesBtn = document.getElementById('yes-btn');
+        const mascot = document.getElementById('mascot');
+        const subTitle = document.getElementById('sub-title');
 
-            ['ar', 'en', 'fr'].forEach(l => {
-                const btn = document.getElementById(`btn-${l}`);
-                if (l === lang) {
-                    btn.className = "px-3 py-1 rounded-full text-xs font-bold shadow transition-all bg-pink-600 text-white scale-105";
+        // Web Audio API Synthesizer for Romantic Sound Effects
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        // Playful Tease Sound
+        function playTeaseSound() {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.18);
+
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.18);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start();
+                osc.stop(ctx.currentTime + 0.18);
+            } catch(e){}
+        }
+
+        // Romantic Chime / Harp Sound for Celebration
+        function playChimeSound() {
+            try {
+                const ctx = getAudioContext();
+                const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51]; // C5, E5, G5, C6, E6
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.08);
+
+                    gain.gain.setValueAtTime(0, ctx.currentTime + idx * 0.08);
+                    gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + idx * 0.08 + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.08 + 0.6);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(ctx.currentTime + idx * 0.08);
+                    osc.stop(ctx.currentTime + idx * 0.08 + 0.6);
+                });
+            } catch(e){}
+        }
+
+        // Attach High Precision Touch & Mouse triggers for Mobile
+        const triggerEvents = ['pointerdown', 'touchstart', 'mousemove'];
+        triggerEvents.forEach(evt => {
+            noBtn.addEventListener(evt, function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                evadeNoButton(e);
+            }, { passive: false });
+        });
+
+        /**
+         * STUBBORN ENDLESS DODGING INSIDE THE CENTRAL WHITE CARD CONTAINER
+         */
+        function evadeNoButton(e) {
+            dodgeCount++;
+            const t = translations[currentLang];
+
+            // Haptic vibration feedback for mobile devices
+            if (navigator.vibrate) {
+                navigator.vibrate(35);
+            }
+
+            playTeaseSound();
+
+            // 1. Pop floating emote particle near touch/cursor position
+            spawnEmotePopup(e);
+
+            // 2. Change mascot emotion and teasing girl subtitle
+            mascot.innerText = t.mascots[dodgeCount % t.mascots.length];
+            subTitle.innerText = t.subtitles[(dodgeCount - 1) % t.subtitles.length];
+            document.getElementById('no-text').innerText = t.noPhrases[dodgeCount % t.noPhrases.length];
+
+            // 3. Make YES button grow bigger gradually
+            yesScale = Math.min(yesScale + 0.08, 1.6);
+            yesBtn.style.transform = `scale(${yesScale})`;
+
+            // 4. Calculate strict internal bounds inside the white card
+            const cardRect = card.getBoundingClientRect();
+            const btnWidth = noBtn.offsetWidth;
+            const btnHeight = noBtn.offsetHeight;
+
+            // Safe padding so the button NEVER touches or overlaps the border of the card
+            const pad = 18;
+
+            const minX = pad;
+            const maxX = cardRect.width - btnWidth - pad;
+            const minY = pad;
+            const maxY = cardRect.height - btnHeight - pad;
+
+            // Generate next random location inside card bounds
+            let randomX = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+            let randomY = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
+
+            // Make NO button absolute relative to card container
+            if (noBtn.style.position !== 'absolute') {
+                noBtn.style.position = 'absolute';
+            }
+
+            noBtn.style.left = '0px';
+            noBtn.style.top = '0px';
+            noBtn.style.transform = `translate3d(${randomX}px, ${randomY}px, 0px)`;
+        }
+
+        // Spawns cute floating emojis at dodge location
+        function spawnEmotePopup(e) {
+            const emojis = ['🥺', '🌸', '🎀', '💖', '🐰', '✨', '👑', '💘'];
+            const popup = document.createElement('div');
+            popup.className = 'emote-popup';
+            popup.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+
+            const cardRect = card.getBoundingClientRect();
+            let clickX = cardRect.width / 2;
+            let clickY = cardRect.height / 2;
+
+            if (e && (e.clientX || (e.touches && e.touches[0]))) {
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
+                clickX = clientX - cardRect.left;
+                clickY = clientY - cardRect.top;
+            }
+
+            popup.style.left = `${clickX}px`;
+            popup.style.top = `${clickY}px`;
+
+            card.appendChild(popup);
+            setTimeout(() => popup.remove(), 850);
+        }
+
+        // Multilingual language change handler
+        function changeLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+
+            const t = translations[lang];
+            document.getElementById('main-title').innerText = t.title;
+            
+            if (dodgeCount === 0) {
+                subTitle.innerText = t.subtitle;
+            } else {
+                subTitle.innerText = t.subtitles[(dodgeCount - 1) % t.subtitles.length];
+            }
+
+            document.getElementById('yes-text').innerText = t.yesBtn;
+            document.getElementById('no-text').innerText = t.noPhrases[dodgeCount % t.noPhrases.length];
+            document.getElementById('success-title').innerText = t.successTitle;
+            document.getElementById('success-desc').innerText = t.successDesc;
+        }
+
+        // Celebration procedure when Princess taps YES
+        function celebrateLove() {
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 150, 50, 250]);
+            }
+
+            playChimeSound();
+
+            // Confetti Cannon Burst
+            confetti({
+                particleCount: 180,
+                spread: 120,
+                origin: { y: 0.6 },
+                colors: ['#ec4899', '#f43f5e', '#a855f7', '#f472b6', '#fbbf24', '#ffffff']
+            });
+
+            setTimeout(() => {
+                confetti({
+                    particleCount: 80,
+                    angle: 60,
+                    spread: 70,
+                    origin: { x: 0 }
+                });
+                confetti({
+                    particleCount: 80,
+                    angle: 120,
+                    spread: 70,
+                    origin: { x: 1 }
+                });
+            }, 300);
+
+            // Hide main question and switch to success view
+            document.getElementById('interactive-area').style.display = 'none';
+            document.getElementById('main-title').style.display = 'none';
+            subTitle.style.display = 'none';
+            mascot.style.display = 'none';
+            
+            document.getElementById('success-view').classList.remove('hidden');
+            document.getElementById('success-view').classList.add('flex');
+        }
+
+        // Reset application state
+        function resetApp() {
+            dodgeCount = 0;
+            yesScale = 1;
+
+            noBtn.style.position = 'relative';
+            noBtn.style.left = 'auto';
+            noBtn.style.top = 'auto';
+            noBtn.style.transform = 'none';
+
+            yesBtn.style.transform = 'scale(1)';
+            mascot.innerText = translations[currentLang].mascots[0];
+
+            document.getElementById('interactive-area').style.display = 'flex';
+            document.getElementById('main-title').style.display = 'block';
+            subTitle.style.display = 'flex';
+            mascot.style.display = 'inline-block';
+
+            document.getElementById('success-view').classList.add('hidden');
+            document.getElementById('success-view').classList.remove('flex');
+            
+            changeLanguage(currentLang);
+        }
+
+        // Code Modal Toggle & Switcher
+        function toggleCodeModal(show) {
+            const modal = document.getElementById('code-modal');
+            if (show) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function switchCodeTab(langKey) {
+            const tabs = ['js', 'python', 'react', 'csharp'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === langKey) {
+                    btn.className = 'px-4 py-2.5 font-mono font-bold text-pink-400 border-b-2 border-pink-500 bg-gray-900/60 whitespace-nowrap';
                 } else {
-                    btn.className = "px-3 py-1 rounded-full text-xs font-bold shadow transition-all bg-white/80 text-pink-700 hover:bg-white";
+                    btn.className = 'px-4 py-2.5 font-mono text-gray-400 hover:text-gray-200 whitespace-nowrap';
                 }
             });
+
+            document.getElementById('code-snippet-box').textContent = codeSnippets[langKey];
         }
 
-        function dodgeNo(e) {
-            if (e) e.preventDefault();
-            const card = document.getElementById('card');
-            const noBtn = document.getElementById('no-btn');
-            const yesBtn = document.getElementById('yes-btn');
+        // Start floating background romantic emojis
+        function startFloatingBackground() {
+            const container = document.getElementById('particles-bg');
+            const items = ['💖', '🌸', '✨', '👑', '🎀', '🌹', '💗', '🐰', '💘'];
 
-            const rect = card.getBoundingClientRect();
-            const btnWidth = 90;
-            const btnHeight = 40;
-            const padding = 25;
+            setInterval(() => {
+                const item = document.createElement('div');
+                item.className = 'floating-particle text-2xl sm:text-3xl';
+                item.innerText = items[Math.floor(Math.random() * items.length)];
+                
+                item.style.left = `${Math.random() * 92}vw`;
+                const duration = 5 + Math.random() * 5;
+                item.style.animationDuration = `${duration}s`;
 
-            const maxLeft = rect.width - btnWidth - padding;
-            const maxTop = rect.height - btnHeight - padding;
+                container.appendChild(item);
 
-            const randomLeft = Math.max(padding, Math.random() * maxLeft);
-            const randomTop = Math.max(padding + 80, Math.random() * maxTop);
-
-            noBtn.style.left = `${randomLeft}px`;
-            noBtn.style.top = `${randomTop}px`;
-
-            yesScale = Math.min(yesScale + 0.12, 2.2);
-            yesBtn.style.transform = `translate(-50%, -50%) scale(${yesScale})`;
-
-            if (navigator.vibrate) navigator.vibrate(40);
+                setTimeout(() => {
+                    item.remove();
+                }, duration * 1000);
+            }, 350);
         }
 
-        function handleAccept() {
-            document.getElementById('question-screen').classList.add('hidden');
-            document.getElementById('success-screen').classList.remove('hidden');
-            document.getElementById('lang-container').classList.add('hidden');
-
-            confetti({
-                particleCount: 120,
-                spread: 70,
-                origin: { y: 0.6 }
-            });
-        }
+        window.onload = function() {
+            startFloatingBackground();
+        };
     </script>
 </body>
 </html>
