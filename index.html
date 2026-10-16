@@ -37,13 +37,6 @@
             box-shadow: 0 25px 50px -12px rgba(236, 72, 153, 0.35), 0 0 30px rgba(244, 114, 182, 0.2);
         }
 
-        /* Spring-like smooth Dodge physics for NO button */
-        #no-btn {
-            transition: transform 0.28s cubic-bezier(0.34, 1.75, 0.64, 1);
-            will-change: transform;
-            touch-action: none;
-        }
-
         /* Ambient floating romantic background particles */
         @keyframes floatUp {
             0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; }
@@ -71,21 +64,6 @@
             animation: pulseGlow 2s infinite ease-in-out;
         }
 
-        /* Floating Emote popups on dodge */
-        @keyframes popFade {
-            0% { opacity: 0; transform: translate(-50%, 0) scale(0.5) rotate(-10deg); }
-            50% { opacity: 1; transform: translate(-50%, -35px) scale(1.3) rotate(10deg); }
-            100% { opacity: 0; transform: translate(-50%, -60px) scale(1) rotate(0deg); }
-        }
-
-        .emote-popup {
-            position: absolute;
-            pointer-events: none;
-            animation: popFade 0.85s ease-out forwards;
-            font-size: 2rem;
-            z-index: 40;
-        }
-
         /* Custom Scrollbar for Code Inspector Modal */
         .custom-scroll::-webkit-scrollbar {
             width: 6px;
@@ -103,12 +81,11 @@
 
 <body class="h-full w-full flex flex-col justify-between items-center p-3 sm:p-4 overflow-hidden relative selection:bg-none">
 
-    <!-- Ambient Floating Particles (Hearts, Stars, Flowers) -->
+    <!-- Ambient Floating Particles -->
     <div id="particles-bg" class="absolute inset-0 overflow-hidden pointer-events-none z-0"></div>
 
     <!-- Header / Top Control Bar -->
     <header class="w-full max-w-md flex justify-between items-center pt-2 pb-1 z-20">
-        <!-- Crown & Title Badge -->
         <div class="flex items-center gap-2 bg-white/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-pink-200 shadow-sm">
             <span class="text-xl animate-bounce">👑</span>
             <span class="text-xs font-black text-pink-700 tracking-wide uppercase">For My Princess ✨</span>
@@ -129,18 +106,18 @@
         </div>
     </header>
 
-    <!-- Main Container White Glass Card (STRICT BOUNDARY CONTAINER FOR "NO" BUTTON) -->
+    <!-- Main Container White Glass Card -->
     <main class="w-full max-w-md my-auto z-10 py-2">
         <div id="card" class="glass-card rounded-3xl p-5 sm:p-6 text-center relative overflow-hidden transition-all duration-300 min-h-[490px] flex flex-col justify-between items-center">
             
             <!-- Dynamic Cute Mascot Display -->
             <div class="w-full pt-1 relative">
-                <div id="mascot" class="text-7xl sm:text-8xl transition-all duration-300 transform inline-block filter drop-shadow-md hover:scale-110 cursor-pointer" onclick="playTeaseSound()">
+                <div id="mascot" class="text-7xl sm:text-8xl transition-all duration-300 transform inline-block filter drop-shadow-md">
                     👑🥺
                 </div>
             </div>
 
-            <!-- Romantic Question Title & Interactive Teasing Subtitle -->
+            <!-- Romantic Question Title & Subtitle -->
             <div class="w-full my-auto px-1 z-10">
                 <h1 id="main-title" class="text-2xl sm:text-3xl font-black text-gray-800 mb-2 leading-snug drop-shadow-sm">
                     هل تحبينني يا أميرتي؟ 💖✨
@@ -150,17 +127,17 @@
                 </p>
             </div>
 
-            <!-- Interactive Buttons Play Area (Bounded Playground inside White Card) -->
-            <div id="interactive-area" class="w-full relative min-h-[180px] flex flex-col justify-end items-center gap-3.5 pb-2 overflow-hidden rounded-2xl border border-pink-100/50 bg-white/40 p-2">
+            <!-- Interactive Buttons Area (Fixed Buttons) -->
+            <div id="interactive-area" class="w-full relative min-h-[160px] flex flex-col justify-end items-center gap-3.5 pb-2 rounded-2xl border border-pink-100/50 bg-white/40 p-2">
                 
-                <!-- YES Button (Progressively grows and seduces tap) -->
+                <!-- YES Button -->
                 <button id="yes-btn" onclick="celebrateLove()" class="w-full bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 text-white font-black py-3.5 px-6 rounded-2xl shadow-lg pulse-glow text-lg sm:text-xl flex items-center justify-center gap-2 active:scale-95 transition-all duration-300 cursor-pointer border-b-4 border-rose-700 z-10">
                     <i class="fa-solid fa-heart animate-pulse"></i>
                     <span id="yes-text">نعم، أحبك جداً! 💖</span>
                 </button>
 
-                <!-- NO Button (NEVER GETS CLICKED - STAYS FOREVER INSIDE THIS WHITE CARD BOUNDARY) -->
-                <button id="no-btn" class="w-full bg-pink-50/90 border-2 border-pink-200 text-pink-700 font-bold py-3 px-6 rounded-2xl shadow-sm text-base flex items-center justify-center gap-2 cursor-pointer z-20">
+                <!-- NO Button (Fixed & Sad Trigger) -->
+                <button id="no-btn" onclick="showSadView()" class="w-full bg-pink-50/90 border-2 border-pink-200 text-pink-700 font-bold py-3 px-6 rounded-2xl shadow-sm text-base flex items-center justify-center gap-2 cursor-pointer z-20 active:scale-95 transition-transform">
                     <i class="fa-solid fa-heart-crack text-pink-400"></i>
                     <span id="no-text">لا 💔</span>
                 </button>
@@ -188,13 +165,28 @@
                 </div>
             </div>
 
+            <!-- Sad View (When clicking NO) -->
+            <div id="sad-view" class="hidden flex-col items-center justify-center py-2 space-y-4 my-auto w-full z-20">
+                <div class="relative w-32 h-32 sm:w-36 sm:h-36 rounded-full border-4 border-gray-300 shadow-xl bg-gray-100 flex items-center justify-center text-6xl">
+                    🥺💔
+                </div>
+                <h2 id="sad-title" class="text-xl sm:text-2xl font-black text-gray-700 leading-snug px-2">
+                    ليش ما بتحبني؟ 🥺💔
+                </h2>
+                <p id="sad-desc" class="text-gray-500 text-xs sm:text-sm font-semibold px-4">
+                    هيك يهون عليك تزعلني؟ فكري تاني من فضلك... 🌸
+                </p>
+                <button onclick="resetApp()" class="bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold text-xs sm:text-sm py-3 px-6 rounded-full shadow-md active:scale-95 transition-transform flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i> طيب، أكيد بحبك! 💖
+                </button>
+            </div>
+
         </div>
     </main>
 
-    <!-- Code Inspector Drawer / Multi-Programming Modal -->
+    <!-- Code Inspector Drawer Modal -->
     <div id="code-modal" class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 hidden flex-col justify-center items-center p-4 transition-opacity">
         <div class="bg-gray-900 border border-pink-500/30 text-white rounded-3xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
-            <!-- Modal Header -->
             <div class="p-4 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-laptop-code text-pink-400 text-lg"></i>
@@ -207,50 +199,19 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-
-            <!-- Language Tabs -->
-            <div class="flex border-b border-gray-800 bg-gray-950 overflow-x-auto text-xs custom-scroll">
-                <button onclick="switchCodeTab('js')" id="tab-js" class="px-4 py-2.5 font-mono font-bold text-pink-400 border-b-2 border-pink-500 bg-gray-900/60 whitespace-nowrap">
-                    JavaScript (DOM)
-                </button>
-                <button onclick="switchCodeTab('python')" id="tab-python" class="px-4 py-2.5 font-mono text-gray-400 hover:text-gray-200 whitespace-nowrap">
-                    Python (Flask/PyScript)
-                </button>
-                <button onclick="switchCodeTab('react')" id="tab-react" class="px-4 py-2.5 font-mono text-gray-400 hover:text-gray-200 whitespace-nowrap">
-                    React + Tailwind
-                </button>
-                <button onclick="switchCodeTab('csharp')" id="tab-csharp" class="px-4 py-2.5 font-mono text-gray-400 hover:text-gray-200 whitespace-nowrap">
-                    C# (.NET Blazor)
-                </button>
-            </div>
-
-            <!-- Code Content Box -->
             <div class="p-4 overflow-y-auto font-mono text-xs text-pink-100 bg-gray-950/90 custom-scroll flex-1">
-                <pre id="code-snippet-box" class="whitespace-pre-wrap leading-relaxed">
-// Select NO button and white card container
-const noBtn = document.getElementById('no-btn');
-const card = document.getElementById('card');
-
-// Bounded escape physics inside the card
-function dodgeInsideCard() {
-    const cardRect = card.getBoundingClientRect();
-    const padding = 20;
+                <pre class="whitespace-pre-wrap leading-relaxed">
+// Fixed NO button with sad emotional reaction state
+function showSadView() {
+    document.getElementById('interactive-area').style.display = 'none';
+    document.getElementById('main-title').style.display = 'none';
+    document.getElementById('sub-title').style.display = 'none';
+    document.getElementById('mascot').style.display = 'none';
     
-    const maxX = cardRect.width - noBtn.offsetWidth - padding;
-    const maxY = cardRect.height - noBtn.offsetHeight - padding;
-
-    const newX = Math.random() * (maxX - padding) + padding;
-    const newY = Math.random() * (maxY - padding) + padding;
-
-    noBtn.style.position = 'absolute';
-    noBtn.style.transform = `translate3d(${newX}px, ${newY}px, 0)`;
+    document.getElementById('sad-view').classList.remove('hidden');
+    document.getElementById('sad-view').classList.add('flex');
 }
                 </pre>
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="p-3 bg-gray-900 border-t border-gray-800 text-center text-[11px] text-gray-400">
-                ✨ تم تصميم المنطق بشكل احترافي ليعمل بسلاسة 100% على مختلف البيئات وتقنيات البرمجة.
             </div>
         </div>
     </div>
@@ -261,7 +222,6 @@ function dodgeInsideCard() {
     </footer>
 
     <script>
-        // Dictionary for Multilingual Romantic Content Designed Specifically for a Girl
         const translations = {
             ar: {
                 title: "هل تحبينني يا أميرتي؟ 💖✨",
@@ -270,17 +230,8 @@ function dodgeInsideCard() {
                 noBtn: "لا 💔",
                 successTitle: "أعرف أنك تحبينني! أنتِ أجمل هدية في حياتي ✨🥰",
                 successDesc: "شكراً لأنك أميرتي العظيمة ومصدر سعادتي كل يوم! 👑🌸",
-                mascots: ['👑🥺', '👸💖', '🎀✨', '🐰❤️', '😭💔', '🙈💘', '👑😍'],
-                subtitles: [
-                    "ما في خيار لا يا حلوتي! 🥺✨",
-                    "قلبك يحبني، لا تحاولي الهروب! 💖",
-                    "الزر يهرب منك لأن الحب مصيرنا! 💘",
-                    "حتى الزر معترض على كلمة لا! 🤭🌸",
-                    "انقري نعم يا جميلتي أسهلك! 😉👑",
-                    "مستحيل تمسكي الزر! 🚀🎀",
-                    "يا أميرتي اعترافي بحبك فوراً! 🥰🌹"
-                ],
-                noPhrases: ["لا 💔", "أكيد؟ 🥺", "حاولي مجدداً! 😜", "الزر يهرب! 🏃‍♀️", "لا خيار لـ لا! 😭", "لن تمسكيني! 🚀", "اكتبي نعم! 💖"]
+                sadTitle: "ليش ما بتحبني؟ 🥺💔",
+                sadDesc: "هيك يهون عليك تزعلني؟ فكري تاني من فضلك... 🌸"
             },
             en: {
                 title: "Do you love me, Princess? 👑💖",
@@ -289,17 +240,8 @@ function dodgeInsideCard() {
                 noBtn: "No 💔",
                 successTitle: "I knew it! You are the sweetest gift in my life ✨🥰",
                 successDesc: "Thank you for being my amazing princess and my daily joy! 👑🌸",
-                mascots: ['👑🥺', '👸💖', '🎀✨', '🐰❤️', '😭💔', '🙈💘', '👑😍'],
-                subtitles: [
-                    "There is no 'No' option for you, beautiful! 🥺✨",
-                    "Your heart loves me, don't try to run! 💖",
-                    "The button dodges because love is our destiny! 💘",
-                    "Even the NO button refuses your click! 🤭🌸",
-                    "Tapping YES is way easier, my Princess! 😉👑",
-                    "You will never catch the NO button! 🚀🎀",
-                    "Just admit your love already! 🥰🌹"
-                ],
-                noPhrases: ["No 💔", "Are you sure? 🥺", "Try again! 😜", "Can't catch me! 🏃‍♀️", "No choice! 😭", "Too slow! 🚀", "Click YES! 💖"]
+                sadTitle: "Why don't you love me? 🥺💔",
+                sadDesc: "Does it make you happy to make me sad? Think again please... 🌸"
             },
             fr: {
                 title: "M'aimes-tu, ma princesse ? 👑💖",
@@ -308,109 +250,16 @@ function dodgeInsideCard() {
                 noBtn: "Non 💔",
                 successTitle: "Je le savais ! Tu es le plus beau cadeau de ma vie ✨🥰",
                 successDesc: "Merci d'être ma princesse merveilleuse et mon bonheur ! 👑🌸",
-                mascots: ['👑🥺', '👸💖', '🎀✨', '🐰❤️', '😭💔', '🙈💘', '👑😍'],
-                subtitles: [
-                    "Pas d'option 'Non' pour toi, ma belle ! 🥺✨",
-                    "Ton cœur m'aime, n'essaie pas de fuir ! 💖",
-                    "Le bouton s'enfuit car c'est le destin ! 💘",
-                    "Même le bouton refuse de dire non ! 🤭🌸",
-                    "Cliquer OUI est tellement plus simple ! 😉👑",
-                    "Tu ne m'attraperas jamais ! 🚀🎀",
-                    "Avoue ton amour enfin ! 🥰🌹"
-                ],
-                noPhrases: ["Non 💔", "Tu es sûre ? 🥺", "Ressaie ! 😜", "Trop rapide ! 🏃‍♀️", "Impossible ! 😭", "Trop lente ! 🚀", "Clique OUI ! 💖"]
+                sadTitle: "Pourquoi tu ne m'aimes pas ? 🥺💔",
+                sadDesc: "Ça te fait de la peine de me rendre triste ? Repense-y... 🌸"
             }
         };
 
-        // Multi-programming snippets for code inspector
-        const codeSnippets = {
-            js: `// JavaScript (Pure Vanilla DOM)
-const noBtn = document.getElementById('no-btn');
-const card = document.getElementById('card');
-
-function dodgeInsideCard() {
-    const cardRect = card.getBoundingClientRect();
-    const pad = 20; // safety border offset
-    
-    const maxX = cardRect.width - noBtn.offsetWidth - pad;
-    const maxY = cardRect.height - noBtn.offsetHeight - pad;
-
-    const newX = Math.floor(Math.random() * (maxX - pad)) + pad;
-    const newY = Math.floor(Math.random() * (maxY - pad)) + pad;
-
-    noBtn.style.position = 'absolute';
-    noBtn.style.transform = \`translate3d(\${newX}px, \${newY}px, 0)\`;
-}`,
-            python: `# Python (Flask / PyScript / WebAssembly)
-import random
-
-def calculate_bounded_dodge(card_w, card_h, btn_w, btn_h, pad=20):
-    max_x = card_w - btn_w - pad
-    max_y = card_h - btn_h - pad
-    
-    new_x = random.randint(pad, max(pad, int(max_x)))
-    new_y = random.randint(pad, max(pad, int(max_y)))
-    
-    return {"x": new_x, "y": new_y, "transform": f"translate3d({new_x}px, {new_y}px, 0)"}`,
-            react: `// React + Tailwind CSS Hook Component
-import { useState, useRef } from 'react';
-
-export default function LoveProposition() {
-  const [pos, setPos] = useState({ x: 0, y: 0, isAbs: false });
-  const cardRef = useRef(null);
-
-  const handleDodge = () => {
-    if (!cardRef.current) return;
-    const card = cardRef.current.getBoundingClientRect();
-    const pad = 20;
-    const newX = Math.random() * (card.width - 120 - pad) + pad;
-    const newY = Math.random() * (card.height - 50 - pad) + pad;
-    
-    setPos({ x: newX, y: newY, isAbs: true });
-  };
-
-  return (
-    <div ref={cardRef} className="relative glass-card">
-      <button 
-        style={{ transform: pos.isAbs ? \`translate3d(\${pos.x}px, \${pos.y}px, 0)\` : 'none', position: pos.isAbs ? 'absolute' : 'relative' }}
-        onPointerDown={handleDodge}
-      >
-        No 💔
-      </button>
-    </div>
-  );
-}`,
-            csharp: `// C# (.NET Blazor WebAssembly Component)
-@code {
-    private double newX = 0;
-    private double newY = 0;
-    private bool isAbsolute = false;
-
-    private void EvadeNoButton(double cardWidth, double cardHeight, double btnWidth, double btnHeight)
-    {
-        double pad = 20;
-        double maxX = cardWidth - btnWidth - pad;
-        double maxY = cardHeight - btnHeight - pad;
-
-        Random rnd = new Random();
-        newX = rnd.Next((int)pad, Math.Max((int)pad, (int)maxX));
-        newY = rnd.Next((int)pad, Math.Max((int)pad, (int)maxY));
-        isAbsolute = true;
-    }
-}`
-        };
-
         let currentLang = 'ar';
-        let dodgeCount = 0;
-        let yesScale = 1;
-
         const card = document.getElementById('card');
-        const noBtn = document.getElementById('no-btn');
-        const yesBtn = document.getElementById('yes-btn');
         const mascot = document.getElementById('mascot');
         const subTitle = document.getElementById('sub-title');
 
-        // Web Audio API Synthesizer for Romantic Sound Effects
         let audioCtx = null;
         function getAudioContext() {
             if (!audioCtx) {
@@ -422,33 +271,10 @@ export default function LoveProposition() {
             return audioCtx;
         }
 
-        // Playful Tease Sound
-        function playTeaseSound() {
-            try {
-                const ctx = getAudioContext();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(440, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.18);
-
-                gain.gain.setValueAtTime(0.15, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.18);
-
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-
-                osc.start();
-                osc.stop(ctx.currentTime + 0.18);
-            } catch(e){}
-        }
-
-        // Romantic Chime / Harp Sound for Celebration
         function playChimeSound() {
             try {
                 const ctx = getAudioContext();
-                const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51]; // C5, E5, G5, C6, E6
+                const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
                 notes.forEach((freq, idx) => {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
@@ -469,95 +295,31 @@ export default function LoveProposition() {
             } catch(e){}
         }
 
-        // Attach High Precision Touch & Mouse triggers for Mobile
-        const triggerEvents = ['pointerdown', 'touchstart', 'mousemove'];
-        triggerEvents.forEach(evt => {
-            noBtn.addEventListener(evt, function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                evadeNoButton(e);
-            }, { passive: false });
-        });
+        function showSadView() {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(300, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            } catch(e){}
 
-        /**
-         * STUBBORN ENDLESS DODGING INSIDE THE CENTRAL WHITE CARD CONTAINER
-         */
-        function evadeNoButton(e) {
-            dodgeCount++;
-            const t = translations[currentLang];
-
-            // Haptic vibration feedback for mobile devices
-            if (navigator.vibrate) {
-                navigator.vibrate(35);
-            }
-
-            playTeaseSound();
-
-            // 1. Pop floating emote particle near touch/cursor position
-            spawnEmotePopup(e);
-
-            // 2. Change mascot emotion and teasing girl subtitle
-            mascot.innerText = t.mascots[dodgeCount % t.mascots.length];
-            subTitle.innerText = t.subtitles[(dodgeCount - 1) % t.subtitles.length];
-            document.getElementById('no-text').innerText = t.noPhrases[dodgeCount % t.noPhrases.length];
-
-            // 3. Make YES button grow bigger gradually
-            yesScale = Math.min(yesScale + 0.08, 1.6);
-            yesBtn.style.transform = `scale(${yesScale})`;
-
-            // 4. Calculate strict internal bounds inside the white card
-            const cardRect = card.getBoundingClientRect();
-            const btnWidth = noBtn.offsetWidth;
-            const btnHeight = noBtn.offsetHeight;
-
-            // Safe padding so the button NEVER touches or overlaps the border of the card
-            const pad = 18;
-
-            const minX = pad;
-            const maxX = cardRect.width - btnWidth - pad;
-            const minY = pad;
-            const maxY = cardRect.height - btnHeight - pad;
-
-            // Generate next random location inside card bounds
-            let randomX = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
-            let randomY = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
-
-            // Make NO button absolute relative to card container
-            if (noBtn.style.position !== 'absolute') {
-                noBtn.style.position = 'absolute';
-            }
-
-            noBtn.style.left = '0px';
-            noBtn.style.top = '0px';
-            noBtn.style.transform = `translate3d(${randomX}px, ${randomY}px, 0px)`;
+            document.getElementById('interactive-area').style.display = 'none';
+            document.getElementById('main-title').style.display = 'none';
+            subTitle.style.display = 'none';
+            mascot.style.display = 'none';
+            
+            document.getElementById('sad-view').classList.remove('hidden');
+            document.getElementById('sad-view').classList.add('flex');
         }
 
-        // Spawns cute floating emojis at dodge location
-        function spawnEmotePopup(e) {
-            const emojis = ['🥺', '🌸', '🎀', '💖', '🐰', '✨', '👑', '💘'];
-            const popup = document.createElement('div');
-            popup.className = 'emote-popup';
-            popup.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-
-            const cardRect = card.getBoundingClientRect();
-            let clickX = cardRect.width / 2;
-            let clickY = cardRect.height / 2;
-
-            if (e && (e.clientX || (e.touches && e.touches[0]))) {
-                const clientX = e.clientX || e.touches[0].clientX;
-                const clientY = e.clientY || e.touches[0].clientY;
-                clickX = clientX - cardRect.left;
-                clickY = clientY - cardRect.top;
-            }
-
-            popup.style.left = `${clickX}px`;
-            popup.style.top = `${clickY}px`;
-
-            card.appendChild(popup);
-            setTimeout(() => popup.remove(), 850);
-        }
-
-        // Multilingual language change handler
         function changeLanguage(lang) {
             currentLang = lang;
             document.documentElement.lang = lang;
@@ -565,20 +327,15 @@ export default function LoveProposition() {
 
             const t = translations[lang];
             document.getElementById('main-title').innerText = t.title;
-            
-            if (dodgeCount === 0) {
-                subTitle.innerText = t.subtitle;
-            } else {
-                subTitle.innerText = t.subtitles[(dodgeCount - 1) % t.subtitles.length];
-            }
-
+            subTitle.innerText = t.subtitle;
             document.getElementById('yes-text').innerText = t.yesBtn;
-            document.getElementById('no-text').innerText = t.noPhrases[dodgeCount % t.noPhrases.length];
+            document.getElementById('no-text').innerText = t.noBtn;
             document.getElementById('success-title').innerText = t.successTitle;
             document.getElementById('success-desc').innerText = t.successDesc;
+            document.getElementById('sad-title').innerText = t.sadTitle;
+            document.getElementById('sad-desc').innerText = t.sadDesc;
         }
 
-        // Celebration procedure when Princess taps YES
         function celebrateLove() {
             if (navigator.vibrate) {
                 navigator.vibrate([100, 50, 150, 50, 250]);
@@ -586,7 +343,6 @@ export default function LoveProposition() {
 
             playChimeSound();
 
-            // Confetti Cannon Burst
             confetti({
                 particleCount: 180,
                 spread: 120,
@@ -594,22 +350,6 @@ export default function LoveProposition() {
                 colors: ['#ec4899', '#f43f5e', '#a855f7', '#f472b6', '#fbbf24', '#ffffff']
             });
 
-            setTimeout(() => {
-                confetti({
-                    particleCount: 80,
-                    angle: 60,
-                    spread: 70,
-                    origin: { x: 0 }
-                });
-                confetti({
-                    particleCount: 80,
-                    angle: 120,
-                    spread: 70,
-                    origin: { x: 1 }
-                });
-            }, 300);
-
-            // Hide main question and switch to success view
             document.getElementById('interactive-area').style.display = 'none';
             document.getElementById('main-title').style.display = 'none';
             subTitle.style.display = 'none';
@@ -619,31 +359,22 @@ export default function LoveProposition() {
             document.getElementById('success-view').classList.add('flex');
         }
 
-        // Reset application state
         function resetApp() {
-            dodgeCount = 0;
-            yesScale = 1;
-
-            noBtn.style.position = 'relative';
-            noBtn.style.left = 'auto';
-            noBtn.style.top = 'auto';
-            noBtn.style.transform = 'none';
-
-            yesBtn.style.transform = 'scale(1)';
-            mascot.innerText = translations[currentLang].mascots[0];
-
             document.getElementById('interactive-area').style.display = 'flex';
             document.getElementById('main-title').style.display = 'block';
             subTitle.style.display = 'flex';
             mascot.style.display = 'inline-block';
+            mascot.innerText = '👑🥺';
 
             document.getElementById('success-view').classList.add('hidden');
             document.getElementById('success-view').classList.remove('flex');
+
+            document.getElementById('sad-view').classList.add('hidden');
+            document.getElementById('sad-view').classList.remove('flex');
             
             changeLanguage(currentLang);
         }
 
-        // Code Modal Toggle & Switcher
         function toggleCodeModal(show) {
             const modal = document.getElementById('code-modal');
             if (show) {
@@ -655,21 +386,6 @@ export default function LoveProposition() {
             }
         }
 
-        function switchCodeTab(langKey) {
-            const tabs = ['js', 'python', 'react', 'csharp'];
-            tabs.forEach(t => {
-                const btn = document.getElementById(`tab-${t}`);
-                if (t === langKey) {
-                    btn.className = 'px-4 py-2.5 font-mono font-bold text-pink-400 border-b-2 border-pink-500 bg-gray-900/60 whitespace-nowrap';
-                } else {
-                    btn.className = 'px-4 py-2.5 font-mono text-gray-400 hover:text-gray-200 whitespace-nowrap';
-                }
-            });
-
-            document.getElementById('code-snippet-box').textContent = codeSnippets[langKey];
-        }
-
-        // Start floating background romantic emojis
         function startFloatingBackground() {
             const container = document.getElementById('particles-bg');
             const items = ['💖', '🌸', '✨', '👑', '🎀', '🌹', '💗', '🐰', '💘'];
