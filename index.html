@@ -1,415 +1,46 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="h-full">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>هل تحبينني يا أميرتي؟ 👑💖</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Tajawal:wght@500;700;900&display=swap" rel="stylesheet">
-    <!-- Canvas Confetti -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
 
-    <style>
-        * {
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
-        }
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
 
-        body {
-            font-family: 'Cairo', 'Tajawal', sans-serif;
-            background: linear-gradient(135deg, #fff0f6 0%, #fce7f3 35%, #f472b6 75%, #e879f9 100%);
-            overscroll-behavior: none;
-            min-height: 100vh;
-        }
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
 
-        /* Glassmorphism White Card */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.94);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 2px solid rgba(255, 240, 245, 0.9);
-            box-shadow: 0 25px 50px -12px rgba(236, 72, 153, 0.35), 0 0 30px rgba(244, 114, 182, 0.2);
-        }
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="/">
 
-        /* Ambient floating romantic background particles */
-        @keyframes floatUp {
-            0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; }
-            20% { opacity: 0.9; }
-            80% { opacity: 0.9; }
-            100% { transform: translateY(-105vh) rotate(360deg) scale(1.2); opacity: 0; }
-        }
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
 
-        .floating-particle {
-            position: fixed;
-            bottom: -50px;
-            pointer-events: none;
-            animation: floatUp linear infinite;
-            z-index: 1;
-            filter: drop-shadow(0 4px 6px rgba(244, 114, 182, 0.3));
-        }
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="point">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
-        /* Pulsing Glow Effect on YES Button */
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.6), 0 0 15px rgba(244, 114, 182, 0.4); }
-            50% { box-shadow: 0 15px 35px -5px rgba(236, 72, 153, 0.8), 0 0 25px rgba(244, 114, 182, 0.7); }
-        }
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
 
-        .pulse-glow {
-            animation: pulseGlow 2s infinite ease-in-out;
-        }
-
-        /* Custom Scrollbar for Code Inspector Modal */
-        .custom-scroll::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        .custom-scroll::-webkit-scrollbar-track {
-            background: #1e1e2e;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: #f472b6;
-            border-radius: 4px;
-        }
-    </style>
+  <title>point</title>
+  <link rel="manifest" href="manifest.json">
 </head>
+<body>
+  <!--
+    You can customize the "flutter_bootstrap.js" script.
+    This is useful to provide a custom configuration to the Flutter loader
+    or to give the user feedback during the initialization process.
 
-<body class="h-full w-full flex flex-col justify-between items-center p-3 sm:p-4 overflow-hidden relative selection:bg-none">
-
-    <!-- Ambient Floating Particles -->
-    <div id="particles-bg" class="absolute inset-0 overflow-hidden pointer-events-none z-0"></div>
-
-    <!-- Header / Top Control Bar -->
-    <header class="w-full max-w-md flex justify-between items-center pt-2 pb-1 z-20">
-        <div class="flex items-center gap-2 bg-white/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-pink-200 shadow-sm">
-            <span class="text-xl animate-bounce">👑</span>
-            <span class="text-xs font-black text-pink-700 tracking-wide uppercase">For My Princess ✨</span>
-        </div>
-
-        <div class="flex items-center gap-2">
-            <!-- Multi-Language Selector -->
-            <select id="lang-select" onchange="changeLanguage(this.value)" class="bg-white/90 backdrop-blur-md text-pink-700 font-bold px-3 py-1.5 rounded-full text-xs sm:text-sm border border-pink-300 shadow-sm focus:outline-none cursor-pointer">
-                <option value="ar">🇸🇦 العربية</option>
-                <option value="en">🇬🇧 English</option>
-                <option value="fr">🇫🇷 Français</option>
-            </select>
-
-            <!-- Tech Stack / Code Inspector Button -->
-            <button onclick="toggleCodeModal(true)" class="bg-white/90 hover:bg-pink-50 text-pink-600 p-2 rounded-full border border-pink-300 shadow-sm transition-transform active:scale-95 text-xs font-bold flex items-center justify-center w-8 h-8" title="عرض لغات البرمجة المستعملة">
-                <i class="fa-solid fa-code"></i>
-            </button>
-        </div>
-    </header>
-
-    <!-- Main Container White Glass Card -->
-    <main class="w-full max-w-md my-auto z-10 py-2">
-        <div id="card" class="glass-card rounded-3xl p-5 sm:p-6 text-center relative overflow-hidden transition-all duration-300 min-h-[490px] flex flex-col justify-between items-center">
-            
-            <!-- Dynamic Cute Mascot Display -->
-            <div class="w-full pt-1 relative">
-                <div id="mascot" class="text-7xl sm:text-8xl transition-all duration-300 transform inline-block filter drop-shadow-md">
-                    👑🥺
-                </div>
-            </div>
-
-            <!-- Romantic Question Title & Subtitle -->
-            <div class="w-full my-auto px-1 z-10">
-                <h1 id="main-title" class="text-2xl sm:text-3xl font-black text-gray-800 mb-2 leading-snug drop-shadow-sm">
-                    هل تحبينني يا أميرتي؟ 💖✨
-                </h1>
-                <p id="sub-title" class="text-pink-600 font-bold text-xs sm:text-sm min-h-[42px] flex items-center justify-center px-2 transition-all duration-300 bg-pink-50/80 rounded-2xl border border-pink-100/80 shadow-inner">
-                    فكري جيداً قبل الإجابة يا جميلتي! 🌸🎀
-                </p>
-            </div>
-
-            <!-- Interactive Buttons Area (Fixed Buttons) -->
-            <div id="interactive-area" class="w-full relative min-h-[160px] flex flex-col justify-end items-center gap-3.5 pb-2 rounded-2xl border border-pink-100/50 bg-white/40 p-2">
-                
-                <!-- YES Button -->
-                <button id="yes-btn" onclick="celebrateLove()" class="w-full bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 text-white font-black py-3.5 px-6 rounded-2xl shadow-lg pulse-glow text-lg sm:text-xl flex items-center justify-center gap-2 active:scale-95 transition-all duration-300 cursor-pointer border-b-4 border-rose-700 z-10">
-                    <i class="fa-solid fa-heart animate-pulse"></i>
-                    <span id="yes-text">نعم، أحبك جداً! 💖</span>
-                </button>
-
-                <!-- NO Button (Fixed & Sad Trigger) -->
-                <button id="no-btn" onclick="showSadView()" class="w-full bg-pink-50/90 border-2 border-pink-200 text-pink-700 font-bold py-3 px-6 rounded-2xl shadow-sm text-base flex items-center justify-center gap-2 cursor-pointer z-20 active:scale-95 transition-transform">
-                    <i class="fa-solid fa-heart-crack text-pink-400"></i>
-                    <span id="no-text">لا 💔</span>
-                </button>
-
-            </div>
-
-            <!-- Celebration View (Initially Hidden) -->
-            <div id="success-view" class="hidden flex-col items-center justify-center py-2 space-y-4 my-auto w-full z-20">
-                <div class="relative w-32 h-32 sm:w-36 sm:h-36 rounded-full border-4 border-pink-300 shadow-2xl bg-gradient-to-tr from-pink-200 to-rose-100 flex items-center justify-center text-6xl animate-bounce">
-                    👸💖✨
-                </div>
-                <h2 id="success-title" class="text-xl sm:text-2xl font-black text-pink-600 leading-snug px-2">
-                    أعرف أنك تحبينني! أنتِ أجمل هدية في حياتي ✨🥰
-                </h2>
-                <p id="success-desc" class="text-gray-600 text-xs sm:text-sm font-semibold px-4">
-                    شكراً لأنك أميرتي العظيمة ومصدر سعادتي كل يوم! 👑🌸
-                </p>
-                <div class="flex gap-2">
-                    <button onclick="playChimeSound()" class="bg-pink-500 text-white font-bold text-xs py-2.5 px-5 rounded-full shadow-md active:scale-95 transition-transform flex items-center gap-2">
-                        <i class="fa-solid fa-music"></i> نغمة الحب 🎵
-                    </button>
-                    <button onclick="resetApp()" class="bg-pink-100 text-pink-700 text-xs font-bold py-2.5 px-5 rounded-full border border-pink-300 active:scale-95 transition-transform">
-                        إعادة السؤال 🔄
-                    </button>
-                </div>
-            </div>
-
-            <!-- Sad View (When clicking NO) -->
-            <div id="sad-view" class="hidden flex-col items-center justify-center py-2 space-y-4 my-auto w-full z-20">
-                <div class="relative w-32 h-32 sm:w-36 sm:h-36 rounded-full border-4 border-gray-300 shadow-xl bg-gray-100 flex items-center justify-center text-6xl">
-                    🥺💔
-                </div>
-                <h2 id="sad-title" class="text-xl sm:text-2xl font-black text-gray-700 leading-snug px-2">
-                    ليش ما بتحبني؟ 🥺💔
-                </h2>
-                <p id="sad-desc" class="text-gray-500 text-xs sm:text-sm font-semibold px-4">
-                    هيك يهون عليك تزعلني؟ فكري تاني من فضلك... 🌸
-                </p>
-                <button onclick="resetApp()" class="bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold text-xs sm:text-sm py-3 px-6 rounded-full shadow-md active:scale-95 transition-transform flex items-center gap-2">
-                    <i class="fa-solid fa-rotate-right"></i> طيب، أكيد بحبك! 💖
-                </button>
-            </div>
-
-        </div>
-    </main>
-
-    <!-- Code Inspector Drawer Modal -->
-    <div id="code-modal" class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 hidden flex-col justify-center items-center p-4 transition-opacity">
-        <div class="bg-gray-900 border border-pink-500/30 text-white rounded-3xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
-            <div class="p-4 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-laptop-code text-pink-400 text-lg"></i>
-                    <div>
-                        <h3 class="text-sm font-bold text-pink-300">طريقة التطبيق بأكثر من لغة برمجة</h3>
-                        <p class="text-[10px] text-gray-400">Implementation in Multiple Languages</p>
-                    </div>
-                </div>
-                <button onclick="toggleCodeModal(false)" class="text-gray-400 hover:text-white text-xl p-1">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="p-4 overflow-y-auto font-mono text-xs text-pink-100 bg-gray-950/90 custom-scroll flex-1">
-                <pre class="whitespace-pre-wrap leading-relaxed">
-// Fixed NO button with sad emotional reaction state
-function showSadView() {
-    document.getElementById('interactive-area').style.display = 'none';
-    document.getElementById('main-title').style.display = 'none';
-    document.getElementById('sub-title').style.display = 'none';
-    document.getElementById('mascot').style.display = 'none';
-    
-    document.getElementById('sad-view').classList.remove('hidden');
-    document.getElementById('sad-view').classList.add('flex');
-}
-                </pre>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="text-white text-xs font-bold opacity-90 z-10 pb-1 text-center drop-shadow flex items-center gap-1.5">
-        <span>صُنع لأجمل أميرة</span> <i class="fa-solid fa-crown text-amber-300"></i>
-    </footer>
-
-    <script>
-        const translations = {
-            ar: {
-                title: "هل تحبينني يا أميرتي؟ 💖✨",
-                subtitle: "فكري جيداً قبل الإجابة يا جميلتي! 🌸🎀",
-                yesBtn: "نعم، أحبك جداً! 💖",
-                noBtn: "لا 💔",
-                successTitle: "أعرف أنك تحبينني! أنتِ أجمل هدية في حياتي ✨🥰",
-                successDesc: "شكراً لأنك أميرتي العظيمة ومصدر سعادتي كل يوم! 👑🌸",
-                sadTitle: "ليش ما بتحبني؟ 🥺💔",
-                sadDesc: "هيك يهون عليك تزعلني؟ فكري تاني من فضلك... 🌸"
-            },
-            en: {
-                title: "Do you love me, Princess? 👑💖",
-                subtitle: "Think carefully, my beautiful girl! 🌸🎀",
-                yesBtn: "Yes, I love you so much! 💖",
-                noBtn: "No 💔",
-                successTitle: "I knew it! You are the sweetest gift in my life ✨🥰",
-                successDesc: "Thank you for being my amazing princess and my daily joy! 👑🌸",
-                sadTitle: "Why don't you love me? 🥺💔",
-                sadDesc: "Does it make you happy to make me sad? Think again please... 🌸"
-            },
-            fr: {
-                title: "M'aimes-tu, ma princesse ? 👑💖",
-                subtitle: "Réfléchis bien, ma belle ! 🌸🎀",
-                yesBtn: "Oui, je t'aime tellement ! 💖",
-                noBtn: "Non 💔",
-                successTitle: "Je le savais ! Tu es le plus beau cadeau de ma vie ✨🥰",
-                successDesc: "Merci d'être ma princesse merveilleuse et mon bonheur ! 👑🌸",
-                sadTitle: "Pourquoi tu ne m'aimes pas ? 🥺💔",
-                sadDesc: "Ça te fait de la peine de me rendre triste ? Repense-y... 🌸"
-            }
-        };
-
-        let currentLang = 'ar';
-        const card = document.getElementById('card');
-        const mascot = document.getElementById('mascot');
-        const subTitle = document.getElementById('sub-title');
-
-        let audioCtx = null;
-        function getAudioContext() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            return audioCtx;
-        }
-
-        function playChimeSound() {
-            try {
-                const ctx = getAudioContext();
-                const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
-                notes.forEach((freq, idx) => {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.08);
-
-                    gain.gain.setValueAtTime(0, ctx.currentTime + idx * 0.08);
-                    gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + idx * 0.08 + 0.02);
-                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.08 + 0.6);
-
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-
-                    osc.start(ctx.currentTime + idx * 0.08);
-                    osc.stop(ctx.currentTime + idx * 0.08 + 0.6);
-                });
-            } catch(e){}
-        }
-
-        function showSadView() {
-            try {
-                const ctx = getAudioContext();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(300, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.3);
-                gain.gain.setValueAtTime(0.15, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.3);
-            } catch(e){}
-
-            document.getElementById('interactive-area').style.display = 'none';
-            document.getElementById('main-title').style.display = 'none';
-            subTitle.style.display = 'none';
-            mascot.style.display = 'none';
-            
-            document.getElementById('sad-view').classList.remove('hidden');
-            document.getElementById('sad-view').classList.add('flex');
-        }
-
-        function changeLanguage(lang) {
-            currentLang = lang;
-            document.documentElement.lang = lang;
-            document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
-
-            const t = translations[lang];
-            document.getElementById('main-title').innerText = t.title;
-            subTitle.innerText = t.subtitle;
-            document.getElementById('yes-text').innerText = t.yesBtn;
-            document.getElementById('no-text').innerText = t.noBtn;
-            document.getElementById('success-title').innerText = t.successTitle;
-            document.getElementById('success-desc').innerText = t.successDesc;
-            document.getElementById('sad-title').innerText = t.sadTitle;
-            document.getElementById('sad-desc').innerText = t.sadDesc;
-        }
-
-        function celebrateLove() {
-            if (navigator.vibrate) {
-                navigator.vibrate([100, 50, 150, 50, 250]);
-            }
-
-            playChimeSound();
-
-            confetti({
-                particleCount: 180,
-                spread: 120,
-                origin: { y: 0.6 },
-                colors: ['#ec4899', '#f43f5e', '#a855f7', '#f472b6', '#fbbf24', '#ffffff']
-            });
-
-            document.getElementById('interactive-area').style.display = 'none';
-            document.getElementById('main-title').style.display = 'none';
-            subTitle.style.display = 'none';
-            mascot.style.display = 'none';
-            
-            document.getElementById('success-view').classList.remove('hidden');
-            document.getElementById('success-view').classList.add('flex');
-        }
-
-        function resetApp() {
-            document.getElementById('interactive-area').style.display = 'flex';
-            document.getElementById('main-title').style.display = 'block';
-            subTitle.style.display = 'flex';
-            mascot.style.display = 'inline-block';
-            mascot.innerText = '👑🥺';
-
-            document.getElementById('success-view').classList.add('hidden');
-            document.getElementById('success-view').classList.remove('flex');
-
-            document.getElementById('sad-view').classList.add('hidden');
-            document.getElementById('sad-view').classList.remove('flex');
-            
-            changeLanguage(currentLang);
-        }
-
-        function toggleCodeModal(show) {
-            const modal = document.getElementById('code-modal');
-            if (show) {
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            } else {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }
-        }
-
-        function startFloatingBackground() {
-            const container = document.getElementById('particles-bg');
-            const items = ['💖', '🌸', '✨', '👑', '🎀', '🌹', '💗', '🐰', '💘'];
-
-            setInterval(() => {
-                const item = document.createElement('div');
-                item.className = 'floating-particle text-2xl sm:text-3xl';
-                item.innerText = items[Math.floor(Math.random() * items.length)];
-                
-                item.style.left = `${Math.random() * 92}vw`;
-                const duration = 5 + Math.random() * 5;
-                item.style.animationDuration = `${duration}s`;
-
-                container.appendChild(item);
-
-                setTimeout(() => {
-                    item.remove();
-                }, duration * 1000);
-            }, 350);
-        }
-
-        window.onload = function() {
-            startFloatingBackground();
-        };
-    </script>
+    For more details:
+    * https://docs.flutter.dev/platform-integration/web/initialization
+  -->
+  <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
